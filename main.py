@@ -2,9 +2,6 @@ import sys
 import atexit
 import functools
 import time
-from datetime import datetime
-from datetime import timedelta
-from dateutil import parser
 import re
 import RPi.GPIO as GPIO
 import serial
@@ -26,11 +23,34 @@ from game import Game
 from player import Player
 from senddata import SendData
 from datafromserial import dataFromSerial
+from RF24 import *
+from datetime import datetime
+from datetime import timedelta
+from dateutil import parser
+from config import Config
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(7, GPIO.OUT)
-GPIO.setup(29, GPIO.IN)
-GPIO.setup(13, GPIO.OUT)
+
+radio = RF24(22, 0);
+
+pipes = [0x65646f4e32, 0x65646f4e31]
+min_payload_size = 4
+max_payload_size = 32
+payload_size_increments_by = 1
+next_payload_size = min_payload_size
+inp_role = 'none'
+send_payload = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ789012'
+millis = lambda: int(round(time.time() * 1000))
+radio.begin()
+radio.enableAckPayload()
+radio.setRetries(0,15)
+radio.setAutoAck(1)
+radio.setChannel(20)
+radio.openWritingPipe(pipes[1])
+radio.openReadingPipe(1,pipes[0])
+radio.printDetails()
+radio.startListening()
 
 stopSerial = True
 isOkSerial = False
@@ -44,15 +64,15 @@ counterToSend = 0
 lastSensorRnd = 0
 lightBlinkTimer = 3000  
 totalHits = 0
-hammerHits = 0
+pacVitamin = 0
 buttonOne = 0
 buttonTwo = 0
 buttonThree = 0
 buttonFour = 0
 buttonFive = 0
-buttonSix = 0
-rndSensors = []
-selectedHammer = QStandardItem()
+killPhatom = 0
+
+selectedPacman = QStandardItem()
 
 actual_player = Player()
 actual_game = Game()
@@ -93,6 +113,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             raw_reading = self.port.readline()
             try:
                 if raw_reading:
+                    print(raw_reading)
                     serialReturn = self.dtSerial.verifyData(raw_reading)
                     if "hit" in serialReturn:
                         tmpReturn = serialReturn.split('-')
@@ -105,11 +126,25 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                                 nextLight = True
                         if tmpReturn[0] == "nohit" and (int(tmpReturn[1])-100) == lastSensorRnd:
                             nextLight = True
+                if radio.available():
+                    print('available')
+                    len = radio.getDynamicPayloadSize()
+                    receive_payload = radio.read(len)
+                    print('Got payload size={} value="{}"'.format(len, receive_payload))
+                    # First, stop listening so we can talk
+                    radio.stopListening()
+
+                    # Send the final one back.
+                    radio.write(receive_payload)
+                    print('Sent response.')
+
+                    # Now, resume listening so we catch the next packets.
+                    radio.startListening()
             except:
                 pass
 
     def makeHits(self, sensor):
-        global hammerHits, buttonOne, buttonTwo, buttonThree, buttonFour, buttonFive, buttonSix
+        global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, buttonFive, buttonSix
 
         if sensor == 1:
             buttonOne += 1
@@ -131,35 +166,22 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdFive.display(buttonFive)
         self.lcdSix.display(buttonSix)
 
-    def readingHammer(self, channel):
-        global test, hammerHits
-        # while 1: 
-        if GPIO.input(29) == True:
-            time.sleep(0.025) 
-            test[0] = GPIO.input(29)
-            time.sleep(0.01)
-            test[1] = GPIO.input(29)
-            time.sleep(0.01)
-            test[2] = GPIO.input(29)
-            time.sleep(0.01)
-            test[3] = GPIO.input(29)
-            time.sleep(0.01)
-            test[4] = GPIO.input(29)
-            time.sleep(0.01)
-            print(test)
-            tmp = ''.join(map(str,test[0:3]))
-            hitFrom = self.binaryToDecimal(int(tmp))
-            print(hitFrom)
-            if hitFrom == lastSensorRnd:
-                self.stopLight(lastSensorRnd)
-                self.callSensor()
-                nextLight = True
-                hammerHits += 1
-                self.lcdSeven.display(hammerHits)               
+    # def try_read_data(self):
+    #     while 1:
+    #         if radio.available():
+    #             print('available')
+    #             len = radio.getDynamicPayloadSize()
+    #             receive_payload = radio.read(len)
+    #             print('Got payload size={} value="{}"'.format(len, receive_payload))
+    #             # First, stop listening so we can talk
+    #             radio.stopListening()
 
-            # GPIO.output(13, 1)
-            # time.sleep(0.05)
-            # GPIO.output(13, 0)
+    #             # Send the final one back.
+    #             radio.write(receive_payload)
+    #             print('Sent response.')
+
+    #             # Now, resume listening so we catch the next packets.
+    #             radio.startListening()
                 
 
     def showAlert(self, text):
@@ -192,7 +214,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 # self.btnTest.setEnabled(True)
                 self.btnRemove.setEnabled(True)
                 self.btnHammer.setEnabled(True)
-            if modelList.rowCount() == 7:
+            if modelList.rowCount() == 5:
                 self.btnAdd.setEnabled(False)
 
 
@@ -203,7 +225,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         if modelList.rowCount() >= 1:
             self.btnHammer.setEnabled(True)
-        if modelList.rowCount() <= 7:
+        if modelList.rowCount() <= 5:
             self.btnAdd.setEnabled(True)
         if modelList.rowCount() == 0:
             self.btnStart.setEnabled(False)
@@ -267,10 +289,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.lcdFour.setStyleSheet("QWidget {color: blue}")
         if sensor == 5:
             self.lcdFive.setStyleSheet("QWidget {color: blue}")                
-        if sensor == 6:
-            self.lcdSix.setStyleSheet("QWidget {color: blue}")                
-        if sensor == 7:
-            self.lcdSeven.setStyleSheet("QWidget {color: blue}")                
+              
 
     def resetLcdColors(self):
         self.lcdOne.setStyleSheet("QWidget {color: black}")
@@ -278,38 +297,32 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdThree.setStyleSheet("QWidget {color: black}")
         self.lcdFour.setStyleSheet("QWidget {color: black}")
         self.lcdFive.setStyleSheet("QWidget {color: black}")   
-        self.lcdSix.setStyleSheet("QWidget {color: black}")   
-        self.lcdSeven.setStyleSheet("QWidget {color: black}")   
 
     def secondsToStr(self, t):
         rediv = lambda ll,b : list(divmod(ll[0],b))+ll[1:]
         return "%d:%02d:%02d.%03d" % tuple(reduce(rediv,[[t*1000,],1000,60,60]))
 
-    def pressedConfigButton(self):  
-        self.dialog.show()
-
     def pressedStartButton(self):
         print("start")
 
-        global started_time, actual_player, actual_game, lightBlinkTimer, total_time, totalHits, hammerHits, buttonOne, buttonTwo, buttonThree, buttonFour, buttonFive, buttonSix
-
-        self.btnStart.setEnabled(False)
+        global started_time, actual_player, actual_game, lightBlinkTimer, total_time, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
         
-        hammerHits = 0
+        self.btnStart.setEnabled(False)
+
+        settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", yellow="0", purple="0"))
+        print(settings)
+        
+        pacVitamin = 0
         buttonOne = 0
         buttonTwo = 0
         buttonThree = 0
         buttonFour = 0
-        buttonFive = 0
-        buttonSix = 0
 
         self.lcdOne.display(buttonOne)
         self.lcdTwo.display(buttonTwo)
         self.lcdThree.display(buttonThree)
         self.lcdFour.display(buttonFour)
-        self.lcdFive.display(buttonFive)
-        self.lcdSix.display(buttonSix)
-        self.lcdSeven.display(hammerHits)
+        self.lcdFive.display(pacVitamin)
         
         started_time = time.time()
         self.timerOne.start(1)
@@ -318,7 +331,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_game = Game()
         actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
         
-        self.callSensor()
+        self.onLight(1)
 
     def Time(self, lcd):
         global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer
@@ -355,44 +368,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.stopTimer(True)
             counter = 0
 
-    
-    def callSensor(self):
-        global lastSensorRnd, isOkSerial, rndSensors, started_time_light
-        started_time_light = time.time()
-        elapsed = 0
-        while elapsed >= 1:
-            elapsed = time.time() - started_time 
-
-        rndSensor = random.randint(1, 6)
-        print("SensorRnd: {0}".format(rndSensor))
-        # if rndSensor == lastSensorRnd:
-        if rndSensor in rndSensors:
-            self.callSensor()
-        else:
-            rndSensors.append(rndSensor)
-            lastSensorRnd = rndSensor
-            self.sensorTurn(lastSensorRnd)
-            isOkSerial = False
-            GPIO.output(7, GPIO.HIGH)
-            time.sleep(0.05)
-            self.port.write(">{0},{1};".format(rndSensor, lightBlinkTimer))
-            time.sleep(0.05)
-            GPIO.output(7, GPIO.LOW)
-
-        if len(rndSensors) == 6:
-            rndSensors = []
-
-    def stopLight(self, rndSensor):
+    def onLight(self, sensor):
         GPIO.output(7, GPIO.HIGH)
         time.sleep(0.05)
-        self.port.write(">{0},stop;".format(rndSensor))
+        self.port.write(">{0},1;".format(sensor))
         time.sleep(0.05)
         GPIO.output(7, GPIO.LOW)
 
-    def pressedTestButton(self):
-        self.lcdNumber.setStyleSheet("QWidget {color: black}")
-        # self.btnTest.setEnabled(False)
-        self.startSensor()
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -416,22 +398,24 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         reading_thread.daemon = True
         reading_thread.start()    
 
-        GPIO.add_event_detect(29, GPIO.BOTH, callback=self.readingHammer)
+        # GPIO.add_event_detect(29, GPIO.BOTH, callback=self.readingHammer)
 
-        # readingHammer_thread = threading.Thread(target=self.reading)
-        # readingHammer_thread.daemon = True
-        # readingHammer_thread.start()
+        # readingRF_thread = threading.Thread(target=self. try_read_data)
+        # readingRF_thread.daemon = True
+        # readingRF_thread.start()
+
+        self.onLight(1)
 
         atexit.register(self.cleanup)
 
     def pressedHammerButton(self):
-        global modelList, selectedHammer
+        global modelList, selectedPacman
 
         index = random.randint(0,modelList.rowCount()-1)
-        selectedHammer = modelList.takeItem(index)
+        selectedPacman = modelList.takeItem(index)
         modelList.removeRow(index)
-        modelList.insertRow(0, selectedHammer)
-        self.showAlert("Participante com Martelo: " + selectedHammer.text())
+        modelList.insertRow(0, selectedPacman)
+        self.showAlert("Participante como Pacman: " + selectedPacman.text())
         self.btnHammer.setEnabled(False)
         self.lstViewCodes.setSelectionMode(QAbstractItemView.NoSelection)
         self.btnStart.setEnabled(True)
@@ -439,45 +423,32 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def stopTimer(self, auto):
 
-        global actual_player, actual_game, actual_barcode, totalHits, hammerHits, buttonOne, buttonTwo, buttonThree, buttonFour, buttonFive, buttonSix, selectedHammer
+        global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
 
         self.timerOne.stop()
         self.btnStart.setEnabled(False)
         self.btnStop.setEnabled(False)
 
-        # for x in range(5):
-        #     print(x)
-        #     GPIO.output(7, GPIO.HIGH)
-        #     time.sleep(0.05)
-        #     self.port.write(">{0},{1};".format(x+1, 2))
-        #     time.sleep(0.05)
-        #     GPIO.output(7, GPIO.LOW)
-        #     time.sleep(wait_time)
-
-
         for index in range(modelList.rowCount()):
             actual_player = Player()
+
             if index == 0:
-                if hammerHits > 0:
-                    actual_player.addAction("HIT_HAMMER", hammerHits) 
+                if pacVitamin > 0:
+                    actual_player.addAction("EAT_VITAMIN", pacVitamin) 
+                if killPhatom > 0:
+                    actual_player.addAction("KILL_PHANTOM", killPhatom)                     
             if index == 1:
                 if buttonOne > 0:
-                    actual_player.addAction("PUSH_BUTTON", buttonOne)
+                    actual_player.addAction("KILL_PAC_MAN", buttonOne)
             if index == 2:
                 if buttonTwo > 0:
-                    actual_player.addAction("PUSH_BUTTON", buttonTwo)
+                    actual_player.addAction("KILL_PAC_MAN", buttonTwo)
             if index == 3:
                 if buttonThree > 0:
-                    actual_player.addAction("PUSH_BUTTON", buttonThree)
+                    actual_player.addAction("KILL_PAC_MAN", buttonThree)
             if index == 4:
                 if buttonFour > 0:
-                    actual_player.addAction("PUSH_BUTTON", buttonFour)
-            if index == 5:
-                if buttonFive > 0:
-                    actual_player.addAction("PUSH_BUTTON", buttonFive)
-            if index == 6:
-                if buttonSix > 0:
-                    actual_player.addAction("PUSH_BUTTON", buttonSix)                
+                    actual_player.addAction("KILL_PAC_MAN", buttonFour)            
 
             actual_player.token = modelList.item(index).text()
             actual_game.players.append(actual_player)
@@ -490,7 +461,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         if auto == True:
             #Send Data
-            threading.Thread(target=SendData().send_to_calindra, args=(actual_game.toJSON(),"WHACK_A_FRIEND"), kwargs={}).start()
+            threading.Thread(target=SendData().send_to_calindra, args=(actual_game.toJSON(),"PAC_MAN"), kwargs={}).start()
         
 
 def main():

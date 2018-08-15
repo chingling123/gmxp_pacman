@@ -165,19 +165,6 @@ class Ui_MainWindow(object):
         self.lcdThree.setDigitCount(2)
         self.lcdThree.setProperty("value", 0.0)
         self.lcdThree.setObjectName("lcdThree")
-        self.btnConfig = QtWidgets.QPushButton(self.centralWidget)
-        self.btnConfig.setGeometry(QtCore.QRect(690, 418, 91, 41))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        font.setWeight(75)
-        self.btnConfig.setFont(font)
-        self.btnConfig.setStyleSheet("color: rgb(255, 255, 255);\n"
-"background-color: rgb(186, 189, 182);")
-        self.btnConfig.setAutoDefault(False)
-        self.btnConfig.setDefault(False)
-        self.btnConfig.setFlat(False)
-        self.btnConfig.setObjectName("btnConfig")
         MainWindow.setCentralWidget(self.centralWidget)
 
         self.retranslateUi(MainWindow)
@@ -193,5 +180,4 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Participantes:"))
         self.btnHammer.setText(_translate("MainWindow", "Pacman?"))
         self.label_2.setText(_translate("MainWindow", "PACMAN"))
-        self.btnConfig.setText(_translate("MainWindow", "Setup"))
 
