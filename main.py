@@ -122,23 +122,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                         serialReturn = "hit"
                         if tmpReturn[0] == "hit":
                             print(tmpReturn[1])
-                if radio.available():
-                    print('available')
-                    len = radio.getDynamicPayloadSize()
-                    receive_payload = radio.read(len)
-                    print('Got payload size={} value="{}"'.format(len, receive_payload))
             except:
                 pass
-
-    def translate_from_radio(self, msg, size):
-        print('translate')
-        print(msg)
-        translated_msg=[]
-        for i in range(0,size,4):
-            translated_msg.append(int.from_bytes([msg[i+3], msg[i+2], msg[i+1], msg[i]], bytyeorder='big'))
-
-        print(translated_msg)
-        return translated_msg
 
     def makeHits(self, sensor):
         global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, buttonFive, buttonSix
@@ -163,22 +148,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdFive.display(buttonFive)
         self.lcdSix.display(buttonSix)
 
-    # def try_read_data(self):
-    #     while 1:
-    #         if radio.available():
-    #             print('available')
-    #             len = radio.getDynamicPayloadSize()
-    #             receive_payload = radio.read(len)
-    #             print('Got payload size={} value="{}"'.format(len, receive_payload))
-    #             # First, stop listening so we can talk
-    #             radio.stopListening()
-
-    #             # Send the final one back.
-    #             radio.write(receive_payload)
-    #             print('Sent response.')
-
-    #             # Now, resume listening so we catch the next packets.
-    #             radio.startListening()
+    def try_read_data(self):
+        while True:
+            if radio.available():
+                print('available')
+                len = radio.getDynamicPayloadSize()
+                receive_payload = radio.read(len)
+                print('Got payload size={} value="{}"'.format(len, receive_payload))
                 
 
     def showAlert(self, text):
@@ -329,6 +305,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def Time(self, lcd):
         global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer
+
+        if radio.available():
+            while radio.available():
+                print('available')
+                lent = radio.getDynamicPayloadSize()
+                receive_payload = radio.read(lent)
+                print('Got payload size={} value="{}"'.format(lent, receive_payload))
+
         counter += 1
         counterToSend += 1
         elapsed = time.time() - started_time 
@@ -338,29 +322,29 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         lcd.setDigitCount(len(timer))
         lcd.display(timer)
 
-        if serialReturn != "ok" and not isOkSerial:
-            if counter >= lightBlinkTimer + 1500:
-                # CALL ANOTHER LIGHT
-                counter = 0
-                if counterToSend >= 100:
-                    self.callSensor()
-                    counterToSend = 0
-        elif serialReturn == "nohit" or serialReturn == "hit":
-            counter = 0
-            if counterToSend >= 100:
-                self.callSensor()
-                counterToSend = 0
-            # CALL ANOTHER LIGH
-        elif serialReturn == "ok":
-            counter = 0
-            isOkSerial = True
+        # if serialReturn != "ok" and not isOkSerial:
+        #     if counter >= lightBlinkTimer + 1500:
+        #         # CALL ANOTHER LIGHT
+        #         counter = 0
+        #         if counterToSend >= 100:
+        #             self.callSensor()
+        #             counterToSend = 0
+        # elif serialReturn == "nohit" or serialReturn == "hit":
+        #     counter = 0
+        #     if counterToSend >= 100:
+        #         self.callSensor()
+        #         counterToSend = 0
+        #     # CALL ANOTHER LIGH
+        # elif serialReturn == "ok":
+        #     counter = 0
+        #     isOkSerial = True
             
-        serialReturn = ""
+        # serialReturn = ""
 
-        if int(elapsed) >= total_time:
-            print("done")
-            self.stopTimer(True)
-            counter = 0
+        # if int(elapsed) >= total_time:
+        #     print("done")
+        #     self.stopTimer(True)
+        #     counter = 0
 
     def onLight(self, sensor, pacman):
         GPIO.output(7, GPIO.HIGH)
@@ -396,7 +380,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         # GPIO.add_event_detect(29, GPIO.BOTH, callback=self.readingHammer)
 
-        # readingRF_thread = threading.Thread(target=self. try_read_data)
+        # readingRF_thread = threading.Thread(target=self.try_read_data)
         # readingRF_thread.daemon = True
         # readingRF_thread.start()
 
@@ -404,6 +388,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print(settings)
 
         self.onLight(1, settings['pacman'])
+        self.timerOne.start(1)
 
         atexit.register(self.cleanup)
 
@@ -431,45 +416,45 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # Now, resume listening so we catch the next packets.
         radio.startListening()
 
-        global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
+        # global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
 
-        self.timerOne.stop()
-        self.btnStart.setEnabled(False)
-        # self.btnStop.setEnabled(False)
+        # self.timerOne.stop()
+        # self.btnStart.setEnabled(False)
+        # # self.btnStop.setEnabled(False)
 
-        for index in range(modelList.rowCount()):
-            actual_player = Player()
+        # for index in range(modelList.rowCount()):
+        #     actual_player = Player()
 
-            if index == 0:
-                if pacVitamin > 0:
-                    actual_player.addAction("EAT_VITAMIN", pacVitamin) 
-                if killPhatom > 0:
-                    actual_player.addAction("KILL_PHANTOM", killPhatom)                     
-            if index == 1:
-                if buttonOne > 0:
-                    actual_player.addAction("KILL_PAC_MAN", buttonOne)
-            if index == 2:
-                if buttonTwo > 0:
-                    actual_player.addAction("KILL_PAC_MAN", buttonTwo)
-            if index == 3:
-                if buttonThree > 0:
-                    actual_player.addAction("KILL_PAC_MAN", buttonThree)
-            if index == 4:
-                if buttonFour > 0:
-                    actual_player.addAction("KILL_PAC_MAN", buttonFour)            
+        #     if index == 0:
+        #         if pacVitamin > 0:
+        #             actual_player.addAction("EAT_VITAMIN", pacVitamin) 
+        #         if killPhatom > 0:
+        #             actual_player.addAction("KILL_PHANTOM", killPhatom)                     
+        #     if index == 1:
+        #         if buttonOne > 0:
+        #             actual_player.addAction("KILL_PAC_MAN", buttonOne)
+        #     if index == 2:
+        #         if buttonTwo > 0:
+        #             actual_player.addAction("KILL_PAC_MAN", buttonTwo)
+        #     if index == 3:
+        #         if buttonThree > 0:
+        #             actual_player.addAction("KILL_PAC_MAN", buttonThree)
+        #     if index == 4:
+        #         if buttonFour > 0:
+        #             actual_player.addAction("KILL_PAC_MAN", buttonFour)            
 
-            actual_player.token = modelList.item(index).text()
-            actual_game.players.append(actual_player)
+        #     actual_player.token = modelList.item(index).text()
+        #     actual_game.players.append(actual_player)
 
-        modelList.clear()
+        # modelList.clear()
         
-        actual_game.finishTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+        # actual_game.finishTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
-        self.lstViewCodes.setSelectionMode(QAbstractItemView.SingleSelection)
+        # self.lstViewCodes.setSelectionMode(QAbstractItemView.SingleSelection)
 
-        if auto == True:
-            #Send Data
-            threading.Thread(target=SendData().send_to_calindra, args=(actual_game.toJSON(),"PAC_MAN"), kwargs={}).start()
+        # if auto == True:
+        #     #Send Data
+        #     threading.Thread(target=SendData().send_to_calindra, args=(actual_game.toJSON(),"PAC_MAN"), kwargs={}).start()
         
 
 def main():
