@@ -84,6 +84,8 @@ serialReturn = ""
 
 test = [0,0,0,0,0]
 
+settings = []
+
 libc = ctypes.CDLL('libc.so.6')
 
 modelList = QStandardItemModel()
@@ -119,29 +121,24 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                         tmpReturn = serialReturn.split('-')
                         serialReturn = "hit"
                         if tmpReturn[0] == "hit":
-                            print((int(tmpReturn[1])-100))
-                            print(lastSensorRnd)
-                            if (int(tmpReturn[1])-100) == lastSensorRnd:
-                                self.makeHits(int(tmpReturn[1])-100)
-                                nextLight = True
-                        if tmpReturn[0] == "nohit" and (int(tmpReturn[1])-100) == lastSensorRnd:
-                            nextLight = True
+                            print(tmpReturn[1])
                 if radio.available():
                     print('available')
                     len = radio.getDynamicPayloadSize()
                     receive_payload = radio.read(len)
                     print('Got payload size={} value="{}"'.format(len, receive_payload))
-                    # First, stop listening so we can talk
-                    radio.stopListening()
-
-                    # Send the final one back.
-                    radio.write(receive_payload)
-                    print('Sent response.')
-
-                    # Now, resume listening so we catch the next packets.
-                    radio.startListening()
             except:
                 pass
+
+    def translate_from_radio(self, msg, size):
+        print('translate')
+        print(msg)
+        translated_msg=[]
+        for i in range(0,size,4):
+            translated_msg.append(int.from_bytes([msg[i+3], msg[i+2], msg[i+1], msg[i]], bytyeorder='big'))
+
+        print(translated_msg)
+        return translated_msg
 
     def makeHits(self, sensor):
         global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, buttonFive, buttonSix
@@ -308,9 +305,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         global started_time, actual_player, actual_game, lightBlinkTimer, total_time, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
         
         self.btnStart.setEnabled(False)
-
-        settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", yellow="0", purple="0"))
-        print(settings)
         
         pacVitamin = 0
         buttonOne = 0
@@ -331,7 +325,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_game = Game()
         actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
         
-        self.onLight(1)
+        self.onLight(1, settings['pacman'])
 
     def Time(self, lcd):
         global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer
@@ -368,10 +362,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.stopTimer(True)
             counter = 0
 
-    def onLight(self, sensor):
+    def onLight(self, sensor, pacman):
         GPIO.output(7, GPIO.HIGH)
         time.sleep(0.05)
-        self.port.write(">{0},1;".format(sensor))
+        self.port.write(">{0},{1};".format(sensor, pacman))
         time.sleep(0.05)
         GPIO.output(7, GPIO.LOW)
 
@@ -379,6 +373,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.setupUi(self)
+
+        global settings
         
         timerOneCallback = functools.partial(self.Time, lcd=self.lcdNumber)
 
@@ -404,7 +400,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # readingRF_thread.daemon = True
         # readingRF_thread.start()
 
-        self.onLight(1)
+        settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", yellow="0", purple="0"))
+        print(settings)
+
+        self.onLight(1, settings['pacman'])
 
         atexit.register(self.cleanup)
 
@@ -422,12 +421,21 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
 
     def stopTimer(self, auto):
+        
+        radio.stopListening()
+
+        # Send the final one back.
+        radio.write("1")
+        print('Sent response.')
+
+        # Now, resume listening so we catch the next packets.
+        radio.startListening()
 
         global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
 
         self.timerOne.stop()
         self.btnStart.setEnabled(False)
-        self.btnStop.setEnabled(False)
+        # self.btnStop.setEnabled(False)
 
         for index in range(modelList.rowCount()):
             actual_player = Player()
