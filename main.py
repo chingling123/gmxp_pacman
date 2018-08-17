@@ -406,6 +406,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
 
     def stopTimer(self, auto):
+
+        self.onLight(1,7735876)
         
         radio.stopListening()
 
