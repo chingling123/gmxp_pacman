@@ -187,7 +187,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 # self.btnTest.setEnabled(True)
                 self.btnRemove.setEnabled(True)
                 self.btnHammer.setEnabled(True)
-            if modelList.rowCount() == 5:
+            if modelList.rowCount() == 4:
                 self.btnAdd.setEnabled(False)
 
 
@@ -198,7 +198,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         if modelList.rowCount() >= 1:
             self.btnHammer.setEnabled(True)
-        if modelList.rowCount() <= 5:
+        if modelList.rowCount() <= 4:
             self.btnAdd.setEnabled(True)
         if modelList.rowCount() == 0:
             self.btnStart.setEnabled(False)
@@ -399,7 +399,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         selectedPacman = modelList.takeItem(index)
         modelList.removeRow(index)
         modelList.insertRow(0, selectedPacman)
-        self.showAlert("Participante como Pacman: " + selectedPacman.text())
+        # self.showAlert("Participante como Pacman: " + selectedPacman.text())
         self.btnHammer.setEnabled(False)
         self.lstViewCodes.setSelectionMode(QAbstractItemView.NoSelection)
         self.btnStart.setEnabled(True)
