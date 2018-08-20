@@ -58,6 +58,8 @@ isOkSerial = False
 wait_time = 0.3
 started_time = 0
 started_time_light = 0
+started_time_pacman = 0
+isPacman = False
 total_time = 180
 counter = 0
 counterToSend = 0
@@ -71,6 +73,7 @@ buttonThree = 0
 buttonFour = 0
 buttonFive = 0
 killPhatom = 0
+vitaminTime = 20
 
 selectedPacman = QStandardItem()
 
@@ -110,7 +113,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         return decimal
 
     def reading(self):
-        global serialReturn, totalHits, lastSensorRnd, nextLight
+        global serialReturn, pacVitamin
         while 1: 
             raw_reading = self.port.readline()
             try:
@@ -122,6 +125,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                         serialReturn = "hit"
                         if tmpReturn[0] == "hit":
                             print(tmpReturn[1])
+                            pacVitamin = pacVitamin + 1
+                            if tmpReturn[1] == settings['pacman']:
+                                self.sendPacManVitamin()
+                                
             except:
                 pass
 
@@ -148,6 +155,26 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdFive.display(buttonFive)
         self.lcdSix.display(buttonSix)
 
+    def sendNoPacmVitamin(self):
+        print("send no vitamin")
+        radio.stopListening()
+        # Send the final one back.
+        radio.write("nopac")
+        # Now, resume listening so we catch the next packets.
+        radio.startListening()
+
+    def sendPacManVitamin(self):
+        global isPacman, started_time_pacman
+        print("send vitamin")
+        radio.stopListening()
+        # Send the final one back.
+        radio.write("pacma")
+        # Now, resume listening so we catch the next packets.
+        radio.startListening()
+        
+        started_time_pacman = time.time()
+        isPacman = True
+
     def try_read_data(self):
         while True:
             if radio.available():
@@ -156,7 +183,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 receive_payload = radio.read(len)
                 print('Got payload size={} value="{}"'.format(len, receive_payload))
                 
-
     def showAlert(self, text):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Warning)
@@ -184,12 +210,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             item = QStandardItem(barcode)
             modelList.appendRow(item)
             if modelList.rowCount() >= 1:
-                # self.btnTest.setEnabled(True)
                 self.btnRemove.setEnabled(True)
                 self.btnHammer.setEnabled(True)
-            if modelList.rowCount() == 4:
+            if modelList.rowCount() == 5:
                 self.btnAdd.setEnabled(False)
-
 
     def pressedRemoveButton(self):
         global modelList
@@ -198,11 +222,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         if modelList.rowCount() >= 1:
             self.btnHammer.setEnabled(True)
-        if modelList.rowCount() <= 4:
+        if modelList.rowCount() <= 5:
             self.btnAdd.setEnabled(True)
         if modelList.rowCount() == 0:
             self.btnStart.setEnabled(False)
-            # self.btnTest.setEnabled(False)
             self.btnRemove.setEnabled(False)
             self.btnHammer.setEnabled(False)
         
@@ -278,7 +301,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def pressedStartButton(self):
         print("start")
 
-        global started_time, actual_player, actual_game, lightBlinkTimer, total_time, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
+        global started_time, actual_player, actual_game, lightBlinkTimer, total_time, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
         
         self.btnStart.setEnabled(False)
         
@@ -303,8 +326,20 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         self.onLight(1, settings['pacman'])
 
+    def TimeVitamin(self):
+        global started_time_pacman
+        elapsed = time.time() - started_time_pacman
+        if int(elapsed) >= vitaminTime:
+            print('no ispacman')
+            self.timerTwo.stop()
+            self.sendNoPacmVitamin()
+    
     def Time(self, lcd):
-        global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer
+        global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer, isPacman
+
+        if isPacman == True:
+            isPacman = False
+            self.timerTwo.start(1)
 
         if radio.available():
             while radio.available():
@@ -365,6 +400,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.timerOne = QtCore.QTimer(self)
         self.timerOne.timeout.connect(timerOneCallback)
 
+        self.timerTwo = QtCore.QTimer(self)
+        self.timerTwo.timeout.connect(lambda: self.TimeVitamin())
+
         self.btnAdd.clicked.connect(lambda: self.pressedAddButton())
         self.btnRemove.clicked.connect(lambda: self.pressedRemoveButton())
         self.btnStart.clicked.connect(lambda: self.pressedStartButton())
@@ -406,13 +444,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
 
     def stopTimer(self, auto):
-
-        self.onLight(1,7735876)
         
         radio.stopListening()
 
         # Send the final one back.
-        radio.write("1")
+        radio.write("start")
         print('Sent response.')
 
         # Now, resume listening so we catch the next packets.

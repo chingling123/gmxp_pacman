@@ -206,6 +206,16 @@ class Ui_MainWindow(object):
         self.label_6.setStyleSheet("color: rgb(255, 255, 255);")
         self.label_6.setTextFormat(QtCore.Qt.RichText)
         self.label_6.setObjectName("label_6")
+        self.label_7 = QtWidgets.QLabel(self.centralWidget)
+        self.label_7.setGeometry(QtCore.QRect(280, 233, 111, 31))
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_7.setFont(font)
+        self.label_7.setStyleSheet("color: rgb(255, 255, 255);")
+        self.label_7.setTextFormat(QtCore.Qt.RichText)
+        self.label_7.setObjectName("label_7")
         MainWindow.setCentralWidget(self.centralWidget)
 
         self.retranslateUi(MainWindow)
@@ -225,4 +235,5 @@ class Ui_MainWindow(object):
         self.label_4.setText(_translate("MainWindow", "1"))
         self.label_5.setText(_translate("MainWindow", "2"))
         self.label_6.setText(_translate("MainWindow", "3"))
+        self.label_7.setText(_translate("MainWindow", "4"))
 
