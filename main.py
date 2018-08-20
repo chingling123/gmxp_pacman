@@ -159,7 +159,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print("send no vitamin")
         radio.stopListening()
         # Send the final one back.
-        radio.write("nopac")
+    
+        radio.write("nopac>{0};".format(settings['pacman']))
         # Now, resume listening so we catch the next packets.
         radio.startListening()
         self.onLightOut(3)
@@ -169,7 +170,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print("send vitamin")
         radio.stopListening()
         # Send the final one back.
-        radio.write("pacma")
+        radio.write("pacma>{0};".format(settings['pacman']))
         # Now, resume listening so we catch the next packets.
         radio.startListening()
         
@@ -463,7 +464,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         radio.stopListening()
 
         # Send the final one back.
-        radio.write("start")
+        radio.write("start>{0};".format(settings['pacman']))
         print('Sent response.')
 
         # Now, resume listening so we catch the next packets.
