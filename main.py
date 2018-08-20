@@ -126,7 +126,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                         if tmpReturn[0] == "hit":
                             print(tmpReturn[1])
                             pacVitamin = pacVitamin + 1
-                            if tmpReturn[1] == settings['pacman']:
+                            if int(tmpReturn[1]) <= 104:
                                 self.sendPacManVitamin()
                                 
             except:
@@ -162,6 +162,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         radio.write("nopac")
         # Now, resume listening so we catch the next packets.
         radio.startListening()
+        self.onLightOut(3)
 
     def sendPacManVitamin(self):
         global isPacman, started_time_pacman
@@ -174,6 +175,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         started_time_pacman = time.time()
         isPacman = True
+        self.onLightOut(1)
 
     def try_read_data(self):
         while True:
@@ -325,6 +327,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
         
         self.onLight(1, settings['pacman'])
+        self.onLightOut(3)
 
     def TimeVitamin(self):
         global started_time_pacman
@@ -381,6 +384,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         #     self.stopTimer(True)
         #     counter = 0
 
+    def onLightOut(self, color):
+        GPIO.output(7, GPIO.HIGH)
+        time.sleep(0.05)
+        self.port.write(">31,{0};".format(color))
+        time.sleep(0.05)
+        GPIO.output(7, GPIO.LOW)
+
     def onLight(self, sensor, pacman):
         GPIO.output(7, GPIO.HIGH)
         time.sleep(0.05)
@@ -426,8 +436,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print(settings)
 
         self.onLight(1, settings['pacman'])
+        time.sleep(0.1)
+        self.onLightOut(3)
         self.timerOne.start(1)
-
         atexit.register(self.cleanup)
 
     def pressedHammerButton(self):
@@ -444,6 +455,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
 
     def stopTimer(self, auto):
+        
+        self.onLight(1, settings['pacman'])
+        time.sleep(0.1)
+        self.onLightOut(3)
         
         radio.stopListening()
 
