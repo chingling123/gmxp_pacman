@@ -232,22 +232,27 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.btnRemove.setEnabled(False)
             self.btnHammer.setEnabled(False)
         
-    def startSensor(self):
+    def startLights(self):
         global isOkSerial, wait_time
         
-        for x in range(5):
-            print(">{0},{1};".format(x+1, 1))
-            isOkSerial = False
-            GPIO.output(7, GPIO.HIGH)
-            time.sleep(0.05)
-            self.port.write(">{0},{1};".format(x+1, 1))
-            time.sleep(0.05)
-            GPIO.output(7, GPIO.LOW)
-            print("before while")
+        for x in range(29):
+            print(">{0},{1};".format(x+1, settings['pacman']))
+            # isOkSerial = False
+            # GPIO.output(7, GPIO.HIGH)
+            # time.sleep(0.05)
+            # self.port.write(">{0},{1};".format(x+1, 1))
+            # time.sleep(0.05)
+            # GPIO.output(7, GPIO.LOW)
+            # print("before while")
+            # time.sleep(wait_time)
+            self.onLight(x+1, settings['pacman'])
+            # print("after while")
             time.sleep(wait_time)
-            print("after while")
-            self.statusSensor(x, isOkSerial)
-            self.btnStart.setEnabled(True)
+            # self.statusSensor(x, isOkSerial)
+            # self.btnStart.setEnabled(True)
+
+        print("done")
+        self.onLightOut(3)
 
     def statusSensor(self, sensor, isok):
         if sensor == 0:
@@ -438,7 +443,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         self.onLight(1, settings['pacman'])
         time.sleep(0.1)
-        self.onLightOut(3)
+        self.onLightOut(2)
         self.timerOne.start(1)
         atexit.register(self.cleanup)
 
@@ -456,6 +461,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
 
     def stopTimer(self, auto):
+        
+        self.startLights()
         
         self.onLight(1, settings['pacman'])
         time.sleep(0.1)
