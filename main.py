@@ -136,13 +136,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def makeHits(self, sensor):
         global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
 
-        if sensor == 1:
+        if sensor == 1 and not isPacman:
             buttonOne += 1
-        if sensor == 2:
+        if sensor == 2 and not isPacman:
             buttonTwo += 1
-        if sensor == 3:
+        if sensor == 3 and not isPacman:
             buttonThree += 1
-        if sensor == 4:
+        if sensor == 4 and not isPacman:
             buttonFour += 1
         if sensor == 5:
             pacVitamin += 1
@@ -231,7 +231,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             time.sleep(wait_time)
 
         print("done")
-        self.onLightOut(3)
+        self.onLightOut("001")
 
     def statusSensor(self, sensor, isok):
         if sensor == 0:
@@ -312,7 +312,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_game = Game()
         actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
         
-        self.onLight(settings['pacman'])
+        self.startLights()
         self.onLightOut("001")
 
     def TimeVitamin(self):
@@ -344,6 +344,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                     self.makeHits(3)
                 if int(receive_payload[:-4]) == int(settings["purple"]):
                     self.makeHits(4)
+                if int(receive_payload[:-4]) == int(settings["pacman"]):
+                    self.makeHits(5)                    
 
         counter += 1
         counterToSend += 1
@@ -375,7 +377,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         # if int(elapsed) >= total_time:
         #     print("done")
-        #     self.stopTimer(True)
+        #     self.stopTimer(True)onLight
         #     counter = 0
 
     def onLightOut(self, color):
@@ -385,14 +387,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         time.sleep(0.05)
         GPIO.output(7, GPIO.LOW)
 
-    def onLight(self):
-        for index in range(modelList.rowCount()):
-            GPIO.output(7, GPIO.HIGH)
-            time.sleep(0.05)
-            print(">{0},{1};".format(index+1, settings["pacman"]))
-            self.port.write(">{0},{1};".format(index+1, settings["pacman"]))
-            time.sleep(0.05)
-            GPIO.output(7, GPIO.LOW)
+    def onLight(self, sensor, pacman):
+        # for index in range(modelList.rowCount()):
+        GPIO.output(7, GPIO.HIGH)
+        time.sleep(0.05)
+        self.port.write(">{0},{1};".format(sensor, pacman))
+        time.sleep(0.05)
+        GPIO.output(7, GPIO.LOW)
 
 
     def __init__(self):
@@ -432,7 +433,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", orange="0", purple="0"))
         print(settings)
 
-        self.onLight()
         time.sleep(0.1)
         self.onLightOut("001")
         self.timerOne.start(1)
@@ -453,11 +453,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def stopTimer(self, auto):
         
-        # self.startLights()
+        self.startLights()
 
         self.lifeBar.setValue(pacLifes)
-        
-        self.onLight()
 
         time.sleep(0.1)
         self.onLightOut("001")
