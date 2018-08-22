@@ -365,30 +365,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         lcd.setDigitCount(len(timer))
         lcd.display(timer)
 
-        # if serialReturn != "ok" and not isOkSerial:
-        #     if counter >= lightBlinkTimer + 1500:
-        #         # CALL ANOTHER LIGHT
-        #         counter = 0
-        #         if counterToSend >= 100:
-        #             self.callSensor()
-        #             counterToSend = 0
-        # elif serialReturn == "nohit" or serialReturn == "hit":
-        #     counter = 0
-        #     if counterToSend >= 100:
-        #         self.callSensor()
-        #         counterToSend = 0
-        #     # CALL ANOTHER LIGH
-        # elif serialReturn == "ok":
-        #     counter = 0
-        #     isOkSerial = True
-            
-        # serialReturn = ""
-
-        # if int(elapsed) >= total_time:
-        #     print("done")
-        #     self.stopTimer(True)onLight
-        #     counter = 0
-
     def onLightOut(self, color):
         GPIO.output(7, GPIO.HIGH)
         time.sleep(0.05)
@@ -397,7 +373,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         GPIO.output(7, GPIO.LOW)
 
     def onLight(self, sensor, pacman):
-        # for index in range(modelList.rowCount()):
         GPIO.output(7, GPIO.HIGH)
         time.sleep(0.05)
         self.port.write(">{0},{1};".format(sensor, pacman))
@@ -424,7 +399,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnStart.clicked.connect(lambda: self.pressedStartButton())
         self.btnHammer.clicked.connect(lambda: self.pressedHammerButton())
         self.btnStop.clicked.connect(lambda: self.stopTimer(False))
-        # self.btnTest.clicked.connect(lambda: self.pressedTestButton())
 
         self.lstViewCodes.setModel(modelList)
         self.lifeBar.setMaximum(pacLifes)
@@ -432,12 +406,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         reading_thread = threading.Thread(target=self.reading)
         reading_thread.daemon = True
         reading_thread.start()    
-
-        # GPIO.add_event_detect(29, GPIO.BOTH, callback=self.readingHammer)
-
-        # readingRF_thread = threading.Thread(target=self.try_read_data)
-        # readingRF_thread.daemon = True
-        # readingRF_thread.start()
 
         settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", orange="0", purple="0"))
         print(settings)
@@ -454,7 +422,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         selectedPacman = modelList.takeItem(index)
         modelList.removeRow(index)
         modelList.insertRow(0, selectedPacman)
-        # self.showAlert("Participante como Pacman: " + selectedPacman.text())
         self.btnHammer.setEnabled(False)
         self.lstViewCodes.setSelectionMode(QAbstractItemView.NoSelection)
         self.btnStart.setEnabled(True)
