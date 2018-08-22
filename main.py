@@ -134,24 +134,31 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 pass
 
     def makeHits(self, sensor):
-        global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
+        global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, pacLifes
 
         if sensor == 1 and not isPacman:
             buttonOne += 1
+            pacLifes -= 1
         if sensor == 2 and not isPacman:
             buttonTwo += 1
+            pacLifes -= 1
         if sensor == 3 and not isPacman:
             buttonThree += 1
+            pacLifes -= 1
         if sensor == 4 and not isPacman:
             buttonFour += 1
+            pacLifes -= 1
         if sensor == 5:
             pacVitamin += 1
+        if sensor == 6:
+            killPhatom += 1
 
         self.lcdOne.display(buttonOne)
         self.lcdTwo.display(buttonTwo)
         self.lcdThree.display(buttonThree)
         self.lcdFour.display(buttonFour)
         self.lcdPac.display(pacVitamin)
+        self.lifeBar.setValue(pacLifes)
 
     def sendNoPacmVitamin(self):
         print("send no vitamin")
@@ -288,7 +295,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def pressedStartButton(self):
         print("start")
 
-        global started_time, actual_player, actual_game, lightBlinkTimer, total_time, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
+        global started_time, actual_player, actual_game, lightBlinkTimer, total_time, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, pacLifes
         
         self.btnStart.setEnabled(False)
         
@@ -297,6 +304,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         buttonTwo = 0
         buttonThree = 0
         buttonFour = 0
+        killPhatom = 0
+        pacLifes = 4
 
         self.lcdOne.display(buttonOne)
         self.lcdTwo.display(buttonTwo)
@@ -345,7 +354,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 if int(receive_payload[:-4]) == int(settings["purple"]):
                     self.makeHits(4)
                 if int(receive_payload[:-4]) == int(settings["pacman"]):
-                    self.makeHits(5)                    
+                    self.makeHits(6)                    
 
         counter += 1
         counterToSend += 1
@@ -452,6 +461,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
 
     def stopTimer(self, auto):
+
+        pacVitamin = 0
+        buttonOne = 0
+        buttonTwo = 0
+        buttonThree = 0
+        buttonFour = 0
+        killPhatom = 0
         
         self.startLights()
 
