@@ -167,6 +167,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdPac.display(pacVitamin)
         self.lifeBar.setValue(pacLifes)
 
+        if pacLifes < 0:
+            self.stopTimer(True)
+        
+
     def sendNoPacmVitamin(self):
         print("send no vitamin")
         radio.stopListening()
@@ -253,48 +257,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             time.sleep(wait_time)
 
         print("done")
-        self.onLightOut("001")
-
-    def statusSensor(self, sensor, isok):
-        if sensor == 0:
-            if isok:
-                self.lcdNumber.setStyleSheet("QWidget {color: green}")
-            else:
-                self.lcdNumber.setStyleSheet("QWidget {color: red}")
-        if sensor == 1:
-            if isok:
-                self.lcdNumber.setStyleSheet("QWidget {color: green}")
-            else:
-                self.lcdNumber.setStyleSheet("QWidget {color: red}")
-        if sensor == 2:
-            if isok:
-                self.lcdNumber.setStyleSheet("QWidget {color: green}")
-            else:
-                self.lcdNumber.setStyleSheet("QWidget {color: red}")
-        if sensor == 3:
-            if isok:
-                self.lcdNumber.setStyleSheet("QWidget {color: green}")
-            else:
-                self.lcdNumber.setStyleSheet("QWidget {color: red}")
-        if sensor == 4:
-            if isok:
-                self.lcdNumber.setStyleSheet("QWidget {color: green}")
-            else:
-                self.lcdNumber.setStyleSheet("QWidget {color: red}")
-
-    def sensorTurn(self, sensor):
-        self.resetLcdColors()
-        if sensor == 1:
-            self.lcdOne.setStyleSheet("QWidget {color: blue}")
-        if sensor == 2:
-            self.lcdTwo.setStyleSheet("QWidget {color: blue}")
-        if sensor == 3:
-            self.lcdThree.setStyleSheet("QWidget {color: blue}")
-        if sensor == 4:
-            self.lcdFour.setStyleSheet("QWidget {color: blue}")
-        if sensor == 5:
-            self.lcdFive.setStyleSheet("QWidget {color: blue}")                
-              
+        self.onLightOut("001")    
 
     def resetLcdColors(self):
         self.lcdOne.setStyleSheet("QWidget {color: black}")
