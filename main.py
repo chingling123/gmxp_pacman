@@ -74,6 +74,7 @@ buttonFour = 0
 buttonFive = 0
 killPhatom = 0
 vitaminTime = 20
+pacLifes = 4
 
 selectedPacman = QStandardItem()
 
@@ -321,6 +322,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdThree.display(buttonThree)
         self.lcdFour.display(buttonFour)
         self.lcdPac.display(pacVitamin)
+        self.lifeBar.setValue(pacLifes)
         
         started_time = time.time()
         self.timerOne.start(1)
@@ -432,6 +434,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # self.btnTest.clicked.connect(lambda: self.pressedTestButton())
 
         self.lstViewCodes.setModel(modelList)
+        self.lifeBar.setMaximum(pacLifes)
 
         reading_thread = threading.Thread(target=self.reading)
         reading_thread.daemon = True
@@ -468,6 +471,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def stopTimer(self, auto):
         
         # self.startLights()
+
+        self.lifeBar.setValue(pacLifes)
         
         self.onLight(1, settings['pacman'])
         self.onLight(2, settings['pacman'])

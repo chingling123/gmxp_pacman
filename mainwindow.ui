@@ -555,6 +555,48 @@ color: rgb(255, 255, 255);}</string>
      <enum>Qt::RichText</enum>
     </property>
    </widget>
+   <widget class="QProgressBar" name="lifeBar">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>403</x>
+      <y>310</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QProgressBar:horizontal {
+border: 1px solid white;
+border-radius: 3px;
+background: black;
+padding: 1px;
+}
+QProgressBar::chunk:horizontal {
+background: red;
+}</string>
+    </property>
+    <property name="minimum">
+     <number>0</number>
+    </property>
+    <property name="maximum">
+     <number>4</number>
+    </property>
+    <property name="value">
+     <number>2</number>
+    </property>
+    <property name="textVisible">
+     <bool>false</bool>
+    </property>
+    <property name="invertedAppearance">
+     <bool>true</bool>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

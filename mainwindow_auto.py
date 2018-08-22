@@ -216,6 +216,25 @@ class Ui_MainWindow(object):
         self.label_7.setStyleSheet("color: rgb(255, 255, 255);")
         self.label_7.setTextFormat(QtCore.Qt.RichText)
         self.label_7.setObjectName("label_7")
+        self.lifeBar = QtWidgets.QProgressBar(self.centralWidget)
+        self.lifeBar.setEnabled(True)
+        self.lifeBar.setGeometry(QtCore.QRect(403, 310, 81, 23))
+        self.lifeBar.setAutoFillBackground(False)
+        self.lifeBar.setStyleSheet("QProgressBar:horizontal {\n"
+"border: 1px solid white;\n"
+"border-radius: 3px;\n"
+"background: black;\n"
+"padding: 1px;\n"
+"}\n"
+"QProgressBar::chunk:horizontal {\n"
+"background: red;\n"
+"}")
+        self.lifeBar.setMinimum(0)
+        self.lifeBar.setMaximum(4)
+        self.lifeBar.setProperty("value", 2)
+        self.lifeBar.setTextVisible(False)
+        self.lifeBar.setInvertedAppearance(True)
+        self.lifeBar.setObjectName("lifeBar")
         MainWindow.setCentralWidget(self.centralWidget)
 
         self.retranslateUi(MainWindow)
