@@ -161,7 +161,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         radio.write("nopac>{0};".format(settings['pacman']))
         # Now, resume listening so we catch the next packets.
         radio.startListening()
-        self.onLightOut(3)
+        self.onLightOut("001")
 
     def sendPacManVitamin(self):
         global isPacman, started_time_pacman
@@ -174,15 +174,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         started_time_pacman = time.time()
         isPacman = True
-        self.onLightOut(1)
-
-    def try_read_data(self):
-        while True:
-            if radio.available():
-                print('available')
-                len = radio.getDynamicPayloadSize()
-                receive_payload = radio.read(len)
-                print('Got payload size={} value="{}"'.format(len, receive_payload))
+        self.onLightOut("100")
                 
     def showAlert(self, text):
         msg = QMessageBox()
@@ -235,19 +227,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         for x in range(29):
             print(">{0},{1};".format(x+1, settings['pacman']))
-            # isOkSerial = False
-            # GPIO.output(7, GPIO.HIGH)
-            # time.sleep(0.05)
-            # self.port.write(">{0},{1};".format(x+1, 1))
-            # time.sleep(0.05)
-            # GPIO.output(7, GPIO.LOW)
-            # print("before while")
-            # time.sleep(wait_time)
             self.onLight(x+1, settings['pacman'])
-            # print("after while")
             time.sleep(wait_time)
-            # self.statusSensor(x, isOkSerial)
-            # self.btnStart.setEnabled(True)
 
         print("done")
         self.onLightOut(3)
@@ -331,8 +312,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_game = Game()
         actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
         
-        self.onLight(1, settings['pacman'])
-        self.onLightOut(3)
+        self.onLight(settings['pacman'])
+        self.onLightOut("001")
 
     def TimeVitamin(self):
         global started_time_pacman
@@ -404,12 +385,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         time.sleep(0.05)
         GPIO.output(7, GPIO.LOW)
 
-    def onLight(self, sensor, pacman):
-        GPIO.output(7, GPIO.HIGH)
-        time.sleep(0.05)
-        self.port.write(">{0},{1};".format(sensor, pacman))
-        time.sleep(0.05)
-        GPIO.output(7, GPIO.LOW)
+    def onLight(self):
+        for index in range(modelList.rowCount()):
+            GPIO.output(7, GPIO.HIGH)
+            time.sleep(0.05)
+            print(">{0},{1};".format(index+1, settings["pacman"]))
+            self.port.write(">{0},{1};".format(index+1, settings["pacman"]))
+            time.sleep(0.05)
+            GPIO.output(7, GPIO.LOW)
 
 
     def __init__(self):
@@ -449,9 +432,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", orange="0", purple="0"))
         print(settings)
 
-        self.onLight(1, settings['pacman'])
+        self.onLight()
         time.sleep(0.1)
-        self.onLightOut(2)
+        self.onLightOut("001")
         self.timerOne.start(1)
         atexit.register(self.cleanup)
 
@@ -474,10 +457,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         self.lifeBar.setValue(pacLifes)
         
-        self.onLight(1, settings['pacman'])
-        self.onLight(2, settings['pacman'])
+        self.onLight()
+
         time.sleep(0.1)
-        self.onLightOut(3)
+        self.onLightOut("001")
         
         radio.stopListening()
 
