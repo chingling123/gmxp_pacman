@@ -134,7 +134,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 pass
 
     def makeHits(self, sensor):
-        global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, pacLifes
+        global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, pacLifes, killPhatom
 
         if sensor == 1 and not isPacman:
             buttonOne += 1
