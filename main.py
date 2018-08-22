@@ -291,6 +291,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdFour.display(buttonFour)
         self.lcdPac.display(pacVitamin)
         self.lifeBar.setValue(pacLifes)
+
+        self.startLights()
+        self.onLightOut("001")
+        self.startGame()
         
         started_time = time.time()
         self.timerOne.start(1)
@@ -298,9 +302,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_player = Player()
         actual_game = Game()
         actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-        
-        self.startLights()
-        self.onLightOut("001")
+
+    def startGame(self):
+        radio.stopListening()
+        # Send the final one back.
+        radio.write("start>{0};".format(settings['pacman']))
+        # Now, resume listening so we catch the next packets.
+        radio.startListening()        
 
     def TimeVitamin(self):
         global started_time_pacman
@@ -409,68 +417,68 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def stopTimer(self, auto):
 
-        pacVitamin = 0
-        buttonOne = 0
-        buttonTwo = 0
-        buttonThree = 0
-        buttonFour = 0
-        killPhatom = 0
+        # pacVitamin = 0
+        # buttonOne = 0
+        # buttonTwo = 0
+        # buttonThree = 0self.lifeBar.setValue(pacLifes)
+        # buttonFour = 0
+        # killPhatom = 0
         
-        self.startLights()
+        # self.startLights()
 
-        self.lifeBar.setValue(pacLifes)
+        # self.lifeBar.setValue(pacLifes)
 
-        time.sleep(0.1)
-        self.onLightOut("001")
+        # time.sleep(0.1)
+        # self.onLightOut("001")
         
-        radio.stopListening()
+        # radio.stopListening()
 
-        # Send the final one back.
-        radio.write("start>{0};".format(settings['pacman']))
-        print('Sent response.')
+        # # Send the final one back.
+        # radio.write("start>{0};".format(settings['pacman']))
+        # print('Sent response.')
 
-        # Now, resume listening so we catch the next packets.
-        radio.startListening()
+        # # Now, resume listening so we catch the next packets.
+        # radio.startListening()
 
-        # global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
+        global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
 
-        # self.timerOne.stop()
-        # self.btnStart.setEnabled(False)
-        # # self.btnStop.setEnabled(False)
+        self.timerOne.stop()
+        self.btnStart.setEnabled(False)
+        # self.btnStop.setEnabled(False)
 
-        # for index in range(modelList.rowCount()):
-        #     actual_player = Player()
+        for index in range(modelList.rowCount()):
+            actual_player = Player()
 
-        #     if index == 0:
-        #         if pacVitamin > 0:
-        #             actual_player.addAction("EAT_VITAMIN", pacVitamin) 
-        #         if killPhatom > 0:
-        #             actual_player.addAction("KILL_PHANTOM", killPhatom)                     
-        #     if index == 1:
-        #         if buttonOne > 0:
-        #             actual_player.addAction("KILL_PAC_MAN", buttonOne)
-        #     if index == 2:
-        #         if buttonTwo > 0:
-        #             actual_player.addAction("KILL_PAC_MAN", buttonTwo)
-        #     if index == 3:
-        #         if buttonThree > 0:
-        #             actual_player.addAction("KILL_PAC_MAN", buttonThree)
-        #     if index == 4:
-        #         if buttonFour > 0:
-        #             actual_player.addAction("KILL_PAC_MAN", buttonFour)            
+            if index == 0:
+                if pacVitamin > 0:
+                    actual_player.addAction("EAT_VITAMIN", pacVitamin) 
+                if killPhatom > 0:
+                    actual_player.addAction("KILL_PHANTOM", killPhatom)                     
+            if index == 1:
+                if buttonOne > 0:
+                    actual_player.addAction("KILL_PAC_MAN", buttonOne)
+            if index == 2:
+                if buttonTwo > 0:
+                    actual_player.addAction("KILL_PAC_MAN", buttonTwo)
+            if index == 3:
+                if buttonThree > 0:
+                    actual_player.addAction("KILL_PAC_MAN", buttonThree)
+            if index == 4:
+                if buttonFour > 0:
+                    actual_player.addAction("KILL_PAC_MAN", buttonFour)            
 
-        #     actual_player.token = modelList.item(index).text()
-        #     actual_game.players.append(actual_player)
+            actual_player.token = modelList.item(index).text()
+            actual_game.players.append(actual_player)
 
-        # modelList.clear()
+        modelList.clear()
         
-        # actual_game.finishTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+        actual_game.finishTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
-        # self.lstViewCodes.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.lstViewCodes.setSelectionMode(QAbstractItemView.SingleSelection)
 
-        # if auto == True:
-        #     #Send Data
-        #     threading.Thread(target=SendData().send_to_calindra, args=(actual_game.toJSON(),"PAC_MAN"), kwargs={}).start()
+        if auto == True:
+            #Send Data
+            threading.Thread(target=SendData().send_to_calindra, args=(actual_game.toJSON(),"PAC_MAN"), kwargs={}).start()
         
 
 def main():
