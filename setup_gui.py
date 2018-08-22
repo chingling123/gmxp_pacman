@@ -44,7 +44,7 @@ class SetupDialog(QDialog, setup_auto.Ui_Dialog):
                             if rfidSet == 3:
                                 self.lblRed.setText(tmpReturn[1])                                
                             if rfidSet == 4:
-                                self.lblYellow.setText(tmpReturn[1])
+                                self.lblOrange.setText(tmpReturn[1])
                             if rfidSet == 5:
                                 self.lblPurple.setText(tmpReturn[1])
             except:
@@ -60,7 +60,7 @@ class SetupDialog(QDialog, setup_auto.Ui_Dialog):
         print("button")
         GPIO.output(7, GPIO.HIGH)
         time.sleep(0.05)
-        self.port.write(">{0},1;".format(1))
+        self.port.write(">63,1;")
         time.sleep(0.05)
         GPIO.output(7, GPIO.LOW)
         
@@ -88,7 +88,7 @@ class SetupDialog(QDialog, setup_auto.Ui_Dialog):
         atexit.register(self.cleanup)
 
     def accept(self):
-        Config().save_pickle('settings.dat', dict(pacman=self.lblPac.text(), blue=self.lblBlue.text(), red=self.lblRed.text(), yellow=self.lblYellow.text(), purple=self.lblPurple.text()))
+        Config().save_pickle('settings.dat', dict(pacman=self.lblPac.text(), blue=self.lblBlue.text(), red=self.lblRed.text(), orange=self.lblOrange.text(), purple=self.lblPurple.text()))
                 
         self.close()
 

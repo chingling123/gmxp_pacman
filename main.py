@@ -74,7 +74,7 @@ buttonFour = 0
 buttonFive = 0
 killPhatom = 0
 vitaminTime = 20
-pacLifes = 4
+pacLifes = 2
 
 selectedPacman = QStandardItem()
 
@@ -126,9 +126,12 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                         serialReturn = "hit"
                         if tmpReturn[0] == "hit":
                             print(tmpReturn[1])
-                            self.makeHits(5)
                             if int(tmpReturn[1]) <= 104:
                                 self.sendPacManVitamin()
+                            elif int(tmpReturn[1]) == 130:
+                                self.sendRevivPacman()
+                            else:
+                                self.makeHits(5)
                                 
             except:
                 pass
@@ -139,15 +142,19 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         if sensor == 1 and not isPacman:
             buttonOne += 1
             pacLifes -= 1
+            self.onLight(30, settings['pacman'])
         if sensor == 2 and not isPacman:
             buttonTwo += 1
             pacLifes -= 1
+            self.onLight(30, settings['pacman'])
         if sensor == 3 and not isPacman:
             buttonThree += 1
             pacLifes -= 1
+            self.onLight(30, settings['pacman'])
         if sensor == 4 and not isPacman:
             buttonFour += 1
             pacLifes -= 1
+            self.onLight(30, settings['pacman'])
         if sensor == 5:
             pacVitamin += 1
         if sensor == 6:
@@ -169,6 +176,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # Now, resume listening so we catch the next packets.
         radio.startListening()
         self.onLightOut("001")
+
+    def sendRevivPacman(self):
+        print("send revive")
+        radio.stopListening()
+        # Send the final one back.    
+        radio.write("reviv>{0};".format(settings['pacman']))
+        # Now, resume listening so we catch the next packets.
+        radio.startListening()   
 
     def sendPacManVitamin(self):
         global isPacman, started_time_pacman
@@ -354,7 +369,9 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 if int(receive_payload[:-4]) == int(settings["purple"]):
                     self.makeHits(4)
                 if int(receive_payload[:-4]) == int(settings["pacman"]):
-                    self.makeHits(6)                    
+                    self.makeHits(6)  
+                if int(receive_payload[:4]) == 130:
+                    self.sendRevivPacman()
 
         counter += 1
         counterToSend += 1
@@ -368,7 +385,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def onLightOut(self, color):
         GPIO.output(7, GPIO.HIGH)
         time.sleep(0.05)
-        self.port.write(">31,{0};".format(color))
+        self.port.write(">62,{0};".format(color))
         time.sleep(0.05)
         GPIO.output(7, GPIO.LOW)
 
