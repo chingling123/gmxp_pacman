@@ -67,18 +67,18 @@ class SetupDialog(QDialog, setup_auto.Ui_Dialog):
     def showEvent(self, event):
         super(SetupDialog, self).showEvent(event)
         
-        self.settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", yellow="0", purple="0"))
+        self.settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", orange="0", purple="0"))
         
         self.lblPac.setText(self.settings["pacman"])
         self.lblBlue.setText(self.settings["blue"])
         self.lblRed.setText(self.settings["red"])
-        self.lblYellow.setText(self.settings["yellow"])
+        self.lblOrange.setText(self.settings["orange"])
         self.lblPurple.setText(self.settings["purple"])
 
         self.btnPac.clicked.connect(lambda: self.pressedButton(1))
         self.btnBlue.clicked.connect(lambda: self.pressedButton(2))
         self.btnRed.clicked.connect(lambda: self.pressedButton(3))
-        self.btnYellow.clicked.connect(lambda: self.pressedButton(4))
+        self.btnOrange.clicked.connect(lambda: self.pressedButton(4))
         self.btnPurple.clicked.connect(lambda: self.pressedButton(5))
 
         reading_thread = threading.Thread(target=self.reading)

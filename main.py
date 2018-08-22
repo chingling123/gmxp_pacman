@@ -125,7 +125,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                         serialReturn = "hit"
                         if tmpReturn[0] == "hit":
                             print(tmpReturn[1])
-                            pacVitamin = pacVitamin + 1
+                            self.makeHits(5)
                             if int(tmpReturn[1]) <= 104:
                                 self.sendPacManVitamin()
                                 
@@ -133,7 +133,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 pass
 
     def makeHits(self, sensor):
-        global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, buttonFive, buttonSix
+        global pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
 
         if sensor == 1:
             buttonOne += 1
@@ -144,16 +144,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         if sensor == 4:
             buttonFour += 1
         if sensor == 5:
-            buttonFive += 1
-        if sensor == 6:
-            buttonSix += 1 
+            pacVitamin += 1
 
         self.lcdOne.display(buttonOne)
         self.lcdTwo.display(buttonTwo)
         self.lcdThree.display(buttonThree)
         self.lcdFour.display(buttonFour)
-        self.lcdFive.display(buttonFive)
-        self.lcdSix.display(buttonSix)
+        self.lcdPac.display(pacVitamin)
 
     def sendNoPacmVitamin(self):
         print("send no vitamin")
@@ -323,7 +320,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdTwo.display(buttonTwo)
         self.lcdThree.display(buttonThree)
         self.lcdFour.display(buttonFour)
-        self.lcdFive.display(pacVitamin)
+        self.lcdPac.display(pacVitamin)
         
         started_time = time.time()
         self.timerOne.start(1)
@@ -344,7 +341,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.sendNoPacmVitamin()
     
     def Time(self, lcd):
-        global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer, isPacman
+        global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer, isPacman, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
 
         if isPacman == True:
             isPacman = False
@@ -356,6 +353,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 lent = radio.getDynamicPayloadSize()
                 receive_payload = radio.read(lent)
                 print('Got payload size={} value="{}"'.format(lent, receive_payload))
+                if int(receive_payload[:-4]) == int(settings["blue"]):
+                    self.makeHits(1)
+                if int(receive_payload[:-4]) == int(settings["red"]):
+                    self.makeHits(2)                   
+                if int(receive_payload[:-4]) == int(settings["orange"]):
+                    self.makeHits(3)
+                if int(receive_payload[:-4]) == int(settings["purple"]):
+                    self.makeHits(4)
 
         counter += 1
         counterToSend += 1
@@ -438,7 +443,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         # readingRF_thread.daemon = True
         # readingRF_thread.start()
 
-        settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", yellow="0", purple="0"))
+        settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", orange="0", purple="0"))
         print(settings)
 
         self.onLight(1, settings['pacman'])
@@ -462,9 +467,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def stopTimer(self, auto):
         
-        self.startLights()
+        # self.startLights()
         
         self.onLight(1, settings['pacman'])
+        self.onLight(2, settings['pacman'])
         time.sleep(0.1)
         self.onLightOut(3)
         
