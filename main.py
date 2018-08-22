@@ -401,7 +401,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print(settings)
 
         time.sleep(0.1)
-        self.onLightOut("001")
+        self.onLightOut("100")
         atexit.register(self.cleanup)
 
     def pressedHammerButton(self):

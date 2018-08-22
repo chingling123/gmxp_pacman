@@ -17,6 +17,6 @@ class SendData:
             req.add_header('Content-Type','application/json;charset=UTF-8')
             req.add_header('Content-Length', str(len(data)))
             response = urllib2.urlopen(req, data)
-            print(response.getcode())
+            print(response)
         except urllib2.HTTPError, e:
-            print e.code
+            print e
