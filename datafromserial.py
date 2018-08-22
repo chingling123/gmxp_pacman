@@ -3,9 +3,10 @@ class dataFromSerial:
         sensor = ""
         cmd = ""
         commaIdx = 0
-        if data[0] == '>':
+        startIdx = data.find('>')
+        if startIdx -1:
             for idx, val in enumerate(data):
-                if idx > 0:
+                if idx > startIdx:
                     if val != ',':
                         if commaIdx == 0:
                             sensor += val

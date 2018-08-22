@@ -74,7 +74,7 @@ buttonFour = 0
 buttonFive = 0
 killPhatom = 0
 vitaminTime = 20
-pacLifes = 2
+pacLifes = 1
 
 selectedPacman = QStandardItem()
 
@@ -166,9 +166,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdFour.display(buttonFour)
         self.lcdPac.display(pacVitamin)
         self.lifeBar.setValue(pacLifes)
-
-        if pacLifes < 0:
-            self.stopTimer(True)
         
 
     def sendNoPacmVitamin(self):
@@ -182,6 +179,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.onLightOut("001")
 
     def sendRevivPacman(self):
+        time.sleep(0.1)
         print("send revive")
         radio.stopListening()
         # Send the final one back.    
@@ -283,7 +281,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         buttonThree = 0
         buttonFour = 0
         killPhatom = 0
-        pacLifes = 4
+        pacLifes = 1
 
         self.lcdOne.display(buttonOne)
         self.lcdTwo.display(buttonTwo)
@@ -319,7 +317,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             self.sendNoPacmVitamin()
     
     def Time(self, lcd):
-        global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer, isPacman, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour
+        global started_time, actual_player, counter, serialReturn, isOkSerial, counterToSend, lightBlinkTimer, isPacman, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, pacLifes
+
+        if pacLifes < 0:
+            self.stopTimer(True)
 
         if isPacman == True:
             isPacman = False
@@ -372,6 +373,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         super(self.__class__, self).__init__()
         self.setupUi(self)
 
+
         global settings
         
         timerOneCallback = functools.partial(self.Time, lcd=self.lcdNumber)
@@ -400,7 +402,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         time.sleep(0.1)
         self.onLightOut("001")
-        self.timerOne.start(1)
         atexit.register(self.cleanup)
 
     def pressedHammerButton(self):
@@ -443,6 +444,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
 
         self.timerOne.stop()
+        self.onLightOut("010")
         self.btnStart.setEnabled(False)
         # self.btnStop.setEnabled(False)
 
