@@ -28,6 +28,7 @@ from datetime import datetime
 from datetime import timedelta
 from dateutil import parser
 from config import Config
+from zabbix_gmxp import SendDataZabbix
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(7, GPIO.OUT)
