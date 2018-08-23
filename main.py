@@ -100,6 +100,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     dtSerial = dataFromSerial()
 
     def cleanup(self):
+        self.onLightOut("000")
         self.port.close()
         GPIO.cleanup()
 
@@ -170,13 +171,15 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def sendNoPacmVitamin(self):
         print("send no vitamin")
+        self.onLightOut("001")
+        time.sleep(0.1)
         radio.stopListening()
         # Send the final one back.
     
         radio.write("nopac>{0};".format(settings['pacman']))
         # Now, resume listening so we catch the next packets.
         radio.startListening()
-        self.onLightOut("001")
+        
 
     def sendRevivPacman(self):
         time.sleep(0.1)
@@ -190,6 +193,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def sendPacManVitamin(self):
         global isPacman, started_time_pacman
         print("send vitamin")
+        self.onLightOut("100")
+        time.sleep(0.1)
         radio.stopListening()
         # Send the final one back.
         radio.write("pacma>{0};".format(settings['pacman']))
@@ -198,7 +203,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
         started_time_pacman = time.time()
         isPacman = True
-        self.onLightOut("100")
                 
     def showAlert(self, text):
         msg = QMessageBox()
@@ -354,6 +358,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         lcd.setDigitCount(len(timer))
         lcd.display(timer)
 
+        if int(elapsed) >= total_time:
+            print("done")
+            self.stopTimer(True)
+
     def onLightOut(self, color):
         GPIO.output(7, GPIO.HIGH)
         time.sleep(0.05)
@@ -401,7 +409,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         print(settings)
 
         time.sleep(0.1)
-        self.onLightOut("100")
+        self.onLightOut("000")
         atexit.register(self.cleanup)
 
     def pressedHammerButton(self):
@@ -417,36 +425,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         
 
     def stopTimer(self, auto):
-
-        # pacVitamin = 0
-        # buttonOne = 0
-        # buttonTwo = 0
-        # buttonThree = 0self.lifeBar.setValue(pacLifes)
-        # buttonFour = 0
-        # killPhatom = 0
-        
-        # self.startLights()
-
-        # self.lifeBar.setValue(pacLifes)
-
-        # time.sleep(0.1)
-        # self.onLightOut("001")
-        
-        # radio.stopListening()
-
-        # # Send the final one back.
-        # radio.write("start>{0};".format(settings['pacman']))
-        # print('Sent response.')
-
-        # # Now, resume listening so we catch the next packets.
-        # radio.startListening()
-
         global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
 
         self.timerOne.stop()
-        self.onLightOut("010")
+        self.onLightOut("000")
         self.btnStart.setEnabled(False)
-        # self.btnStop.setEnabled(False)
+        self.btnAdd.setEnabled(True)
+        self.btnRemove.setEnabled(False)
 
         for index in range(modelList.rowCount()):
             actual_player = Player()

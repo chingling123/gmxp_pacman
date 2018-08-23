@@ -37,7 +37,7 @@ def barcode_reader():
         buffer = fp.read(8)
   
         for c in buffer:
-            print(ord(c))
+            # print(ord(c))
             if ord(c) > 0:
 
                 ##  40 is carriage return which signifies

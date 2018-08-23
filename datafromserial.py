@@ -21,5 +21,5 @@ class dataFromSerial:
                     return cmd.strip(' \n\r\t')[:-1]
                 if "hit" in cmd:
                     print("cmd hit: " + cmd)
-                    print(cmd.strip(' \n\r\t')[:-1])
+                    print(cmd.strip(' \n\r\t')[:-1] + "-" + sensor)
                     return cmd.strip(' \n\r\t')[:-1] + "-" + sensor
