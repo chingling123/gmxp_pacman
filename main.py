@@ -307,6 +307,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_player = Player()
         actual_game = Game()
         actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+        
+        threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "interacao.ativo", 1), kwargs={}).start()
 
     def startGame(self):
         radio.stopListening()
@@ -384,6 +386,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         super(self.__class__, self).__init__()
         self.setupUi(self)
 
+        threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "interacao.ativo", 1), kwargs={}).start()
 
         global settings
         
@@ -469,6 +472,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         if auto == True:
             #Send Data
             threading.Thread(target=SendData().send_to_calindra, args=(actual_game.toJSON(),"PAC_MAN"), kwargs={}).start()
+            threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "interacao.ativo", 2), kwargs={}).start()
         
 
 def main():

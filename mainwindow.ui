@@ -442,7 +442,7 @@ color: rgb(255, 255, 255);}</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 255, 255);</string>
+     <string notr="true">color: rgb(237, 212, 0);</string>
     </property>
     <property name="text">
      <string>PACMAN </string>
@@ -468,10 +468,10 @@ color: rgb(255, 255, 255);}</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 255, 255);</string>
+     <string notr="true">color: rgb(52, 101, 164);</string>
     </property>
     <property name="text">
-     <string>1</string>
+     <string>BLUE</string>
     </property>
     <property name="textFormat">
      <enum>Qt::RichText</enum>
@@ -494,10 +494,10 @@ color: rgb(255, 255, 255);}</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 255, 255);</string>
+     <string notr="true">color: rgb(204, 0, 0);</string>
     </property>
     <property name="text">
-     <string>2</string>
+     <string>RED</string>
     </property>
     <property name="textFormat">
      <enum>Qt::RichText</enum>
@@ -520,10 +520,10 @@ color: rgb(255, 255, 255);}</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 255, 255);</string>
+     <string notr="true">color: rgb(245, 121, 0);</string>
     </property>
     <property name="text">
-     <string>3</string>
+     <string>ORANGE</string>
     </property>
     <property name="textFormat">
      <enum>Qt::RichText</enum>
@@ -546,10 +546,10 @@ color: rgb(255, 255, 255);}</string>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color: rgb(255, 255, 255);</string>
+     <string notr="true">color: rgb(117, 80, 123);</string>
     </property>
     <property name="text">
-     <string>4</string>
+     <string>PURPLE</string>
     </property>
     <property name="textFormat">
      <enum>Qt::RichText</enum>
