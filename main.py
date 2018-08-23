@@ -420,7 +420,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def pressedHammerButton(self):
         global modelList, selectedPacman
-
         index = random.randint(0,modelList.rowCount()-1)
         selectedPacman = modelList.takeItem(index)
         modelList.removeRow(index)
@@ -432,7 +431,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
     def stopTimer(self, auto):
         global killPhatom, actual_player, actual_game, actual_barcode, totalHits, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, selectedPacman
-
+        self.timerTwo.stop()
         self.timerOne.stop()
         self.onLightOut("000")
         self.btnStart.setEnabled(False)
