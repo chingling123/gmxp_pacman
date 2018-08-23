@@ -167,6 +167,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdFour.display(buttonFour)
         self.lcdPac.display(pacVitamin)
         self.lifeBar.setValue(pacLifes)
+        if pacVitamin >= 25:
+            self.stopTimer(True)
         
 
     def sendNoPacmVitamin(self):
