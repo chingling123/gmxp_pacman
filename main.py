@@ -474,7 +474,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
 def main():
     app = QApplication(sys.argv)
-    # app.setOverrideCursor(Qt.BlankCursor)
+    app.setOverrideCursor(Qt.BlankCursor)
     form = MainWindow()
     form.showFullScreen()
     sys.exit(app.exec_())
