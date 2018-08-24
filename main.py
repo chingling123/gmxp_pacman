@@ -308,7 +308,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_game = Game()
         actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
         
-        threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "interacao.ativo", 1), kwargs={}).start()
+        threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "start", 2), kwargs={}).start()
 
     def startGame(self):
         radio.stopListening()
@@ -386,8 +386,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         super(self.__class__, self).__init__()
         self.setupUi(self)
 
-        threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "interacao.ativo", 1), kwargs={}).start()
-
         global settings
         
         timerOneCallback = functools.partial(self.Time, lcd=self.lcdNumber)
@@ -402,7 +400,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnRemove.clicked.connect(lambda: self.pressedRemoveButton())
         self.btnStart.clicked.connect(lambda: self.pressedStartButton())
         self.btnHammer.clicked.connect(lambda: self.pressedHammerButton())
-        self.btnStop.clicked.connect(lambda: self.stopTimer(False))
+        self.btnStop.clicked.connect(lambda: self.stopTimer(True))
 
         self.lstViewCodes.setModel(modelList)
         self.lifeBar.setMaximum(pacLifes)
@@ -471,7 +469,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         if auto == True:
             #Send Data
             threading.Thread(target=SendData().send_to_calindra, args=(actual_game.toJSON(),"PAC_MAN"), kwargs={}).start()
-            threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "interacao.ativo", 2), kwargs={}).start()
+            threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "start", 1), kwargs={}).start()
         
 
 def main():
