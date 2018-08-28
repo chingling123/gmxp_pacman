@@ -101,6 +101,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     dtSerial = dataFromSerial()
 
     def cleanup(self):
+        threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "init", 0), kwargs={}).start()
         self.onLightOut("000")
         self.port.close()
         GPIO.cleanup()
@@ -415,6 +416,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         time.sleep(0.1)
         self.onLightOut("000")
         atexit.register(self.cleanup)
+        threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "init", 1), kwargs={}).start()
 
     def pressedHammerButton(self):
         global modelList, selectedPacman

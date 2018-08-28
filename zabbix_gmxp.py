@@ -6,5 +6,5 @@ class SendDataZabbix:
         packet = [
             ZabbixMetric(localhost, item, data),
         ]
-        result = ZabbixSender(zabbix_server='192.168.30.199',zabbix_port=10051,use_config=None).send(packet)
+        result = ZabbixSender(zabbix_server='192.168.1.50',zabbix_port=10051,use_config=None).send(packet)
         print result
