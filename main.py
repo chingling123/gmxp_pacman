@@ -56,12 +56,12 @@ radio.startListening()
 stopSerial = True
 isOkSerial = False
 
-wait_time = 0.6
+wait_time = 0.4
 started_time = 0
 started_time_light = 0
 started_time_pacman = 0
 isPacman = False
-total_time = 180
+total_time = 90
 counter = 0
 counterToSend = 0
 lastSensorRnd = 0
@@ -169,7 +169,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdFour.display(buttonFour)
         self.lcdPac.display(pacVitamin)
         self.lifeBar.setValue(pacLifes)
-        if pacVitamin >= 20:
+        if pacVitamin >= 14:
             self.stopTimer(True)
         
 
