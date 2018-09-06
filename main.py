@@ -56,7 +56,7 @@ radio.startListening()
 stopSerial = True
 isOkSerial = False
 
-wait_time = 0.3
+wait_time = 0.6
 started_time = 0
 started_time_light = 0
 started_time_pacman = 0
@@ -97,7 +97,7 @@ modelList = QStandardItemModel()
 
 class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
-    port = serial.serial_for_url("/dev/serial0", baudrate=9600, timeout=3.0)
+    port = serial.serial_for_url("/dev/serial0", baudrate=2400, timeout=3.0)
     dtSerial = dataFromSerial()
 
     def cleanup(self):
@@ -124,7 +124,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                 if raw_reading:
                     print(raw_reading)
                     serialReturn = self.dtSerial.verifyData(raw_reading)
-                    if "hit" in serialReturn:
+                    if serialReturn is not None and "hit" in serialReturn:
                         tmpReturn = serialReturn.split('-')
                         serialReturn = "hit"
                         if tmpReturn[0] == "hit":
@@ -169,7 +169,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdFour.display(buttonFour)
         self.lcdPac.display(pacVitamin)
         self.lifeBar.setValue(pacLifes)
-        if pacVitamin >= 25:
+        if pacVitamin >= 20:
             self.stopTimer(True)
         
 
@@ -417,6 +417,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.onLightOut("000")
         atexit.register(self.cleanup)
         threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "init", 1), kwargs={}).start()
+        # self.btnStart.setEnabled(True)
 
     def pressedHammerButton(self):
         global modelList, selectedPacman

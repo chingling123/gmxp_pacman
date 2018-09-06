@@ -5,9 +5,10 @@ import base64
 import threading
 from flata import Flata, where
 from flata.storages import JSONStorage
+from zabbix_gmxp import SendDataZabbix
 
 class SendData:
-    url = "https://api-gamexp.worldticket.com.br/api/events/27/activations/{0}/matches"
+    url = "http://10.210.0.17:5000/api/events/27/activations/{0}/matches"
     username = "bizsys"
     password = "P3wl1#]2Fx3jL)x0"
     db = Flata('db.json', storage=JSONStorage)

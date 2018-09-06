@@ -4,7 +4,7 @@ class dataFromSerial:
         cmd = ""
         commaIdx = 0
         startIdx = data.find('>')
-        if startIdx -1:
+        if (int(startIdx) != -1):
             for idx, val in enumerate(data):
                 if idx > startIdx:
                     if val != ',':
