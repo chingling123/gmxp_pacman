@@ -206,6 +206,18 @@ class Ui_MainWindow(object):
         self.lifeBar.setTextVisible(False)
         self.lifeBar.setInvertedAppearance(True)
         self.lifeBar.setObjectName("lifeBar")
+        self.btnStart = QtWidgets.QPushButton(self.centralWidget)
+        self.btnStart.setGeometry(QtCore.QRect(10, 380, 261, 71))
+        font = QtGui.QFont()
+        font.setPointSize(14)
+        font.setBold(True)
+        font.setWeight(75)
+        self.btnStart.setFont(font)
+        self.btnStart.setStyleSheet(":enabled{\n"
+"    \n"
+"    background-color: rgb(78, 154, 6);\n"
+"color: rgb(255, 255, 255);}")
+        self.btnStart.setObjectName("btnStart")
         MainWindow.setCentralWidget(self.centralWidget)
 
         self.retranslateUi(MainWindow)
@@ -223,4 +235,5 @@ class Ui_MainWindow(object):
         self.label_5.setText(_translate("MainWindow", "RED"))
         self.label_6.setText(_translate("MainWindow", "ORANGE"))
         self.label_7.setText(_translate("MainWindow", "PURPLE"))
+        self.btnStart.setText(_translate("MainWindow", "Start"))
 

@@ -59,6 +59,8 @@ stopSerial = True
 isOkSerial = False
 isPlaying = False
 isRGBBlue = False
+isStop = False
+
 
 wait_time = 0.4
 started_time = 0
@@ -120,28 +122,21 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             i += 1
         return decimal
 
-    def gpio_soft(self):
-        while True:
-            if GPIO.input(11) == 1:
-                if isRGBBlue == True:
-                    isRGBBlue = False
-                    self.onLightOut("100")
-                    self.sendPacManVitamin()
-                else:
-                    isRGBBlue = True
-                    self.onLightOut("001")
-                    self.sendNoPacmVitamin()
-             if GPIO.input(29) == 1:
-                if isPlaying == False:
-                    isPlaying = True
-                    isRGBBlue = True
-                    self.sendNoPacmVitamin()
-                    self.pressedStartButton()
-                else:
-                    isPlaying = False
-                    self.stopTimer(True)
-                    print(GPIO.input(11))
-                    print(GPIO.input(29))
+    def gpio_soft(self, channel):
+        global isPlaying, isRGBBlue, isStop
+        # while True:
+        if GPIO.input(11) == 1:
+            if isRGBBlue == True:
+                isRGBBlue = False
+                self.onLightOut("100")
+                self.sendPacManVitamin()
+                timer.sleep(0.1)
+            else:
+                isRGBBlue = True
+                self.onLightOut("001")
+                self.sendNoPacmVitamin()
+                timer.sleep(0.1)
+        
 
     def reading(self):
         global serialReturn, pacVitamin
@@ -261,7 +256,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
                         item = QStandardItem(actual_barcode)
                         if modelList.rowCount() < 5:
                             modelList.appendRow(item)
-                        if modelList.rowCount() >= 1:
+                        if modelList.rowCount() > 1:
+                            self.btnStart.setEnabled(True)
                             self.btnRemove.setEnabled(True)
                             # self.btnHammer.setEnabled(True)
                         
@@ -286,10 +282,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def startLights(self):
         global isOkSerial, wait_time
         
-        for x in range(29):
-            print(">{0},{1};".format(x+1, settings['pacman']))
-            self.onLight(x+1, settings['pacman'])
-            time.sleep(wait_time)
+        # for x in range(29):
+        print(">{0},{1};".format(1, settings['pacman']))
+        self.onLight(x+1, settings['pacman'])
+        time.sleep(wait_time)
 
         print("done")
         self.onLightOut("001")    
@@ -308,37 +304,38 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
     def pressedStartButton(self):
         print("start")
 
-        global started_time, actual_player, actual_game, lightBlinkTimer, total_time, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, pacLifes
+        global modelList, started_time, actual_player, actual_game, lightBlinkTimer, total_time, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, pacLifes
         
-        # self.btnStart.setEnabled(False)
-        
-        pacVitamin = 0
-        buttonOne = 0
-        buttonTwo = 0
-        buttonThree = 0
-        buttonFour = 0
-        killPhatom = 0
-        pacLifes = 1
+        if modelList.rowCount() > 1:
+            self.btnStart.setEnabled(False)
+            
+            pacVitamin = 0
+            buttonOne = 0
+            buttonTwo = 0
+            buttonThree = 0
+            buttonFour = 0
+            killPhatom = 0
+            pacLifes = 1
 
-        self.lcdOne.display(buttonOne)
-        self.lcdTwo.display(buttonTwo)
-        self.lcdThree.display(buttonThree)
-        self.lcdFour.display(buttonFour)
-        self.lcdPac.display(pacVitamin)
-        self.lifeBar.setValue(pacLifes)
+            self.lcdOne.display(buttonOne)
+            self.lcdTwo.display(buttonTwo)
+            self.lcdThree.display(buttonThree)
+            self.lcdFour.display(buttonFour)
+            self.lcdPac.display(pacVitamin)
+            self.lifeBar.setValue(pacLifes)
 
-        # self.startLights()
-        self.onLightOut("001")
-        self.startGame()
-        
-        started_time = time.time()
-        self.timerOne.start(1)
-        
-        actual_player = Player()
-        actual_game = Game()
-        actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
-        
-        threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "start", 2), kwargs={}).start()
+            self.startLights()
+            self.onLightOut("001")
+            self.startGame()
+            
+            started_time = time.time()
+            self.timerOne.start(1)
+            
+            actual_player = Player()
+            actual_game = Game()
+            actual_game.startTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+            
+            threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "start", 2), kwargs={}).start()
 
     def startGame(self):
         radio.stopListening()
@@ -428,12 +425,12 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         # self.btnAdd.clicked.connect(lambda: self.pressedAddButton())
         self.btnRemove.clicked.connect(lambda: self.pressedRemoveButton())
-        # self.btnStart.clicked.connect(lambda: self.pressedStartButton())
+        self.btnStart.clicked.connect(lambda: self.pressedStartButton())
         # self.btnHammer.clicked.connect(lambda: self.pressedHammerButton())
         self.btnStop.clicked.connect(lambda: self.stopTimer(True))
         # self.btnRGBBlue.clicked.connect(lambda: self.sendNoPacmVitamin())
         # self.btnRGBRed.clicked.connect(lambda: self.sendPacManVitamin())
-
+        self.btnStart.setEnabled(False)
         self.lstViewCodes.setModel(modelList)
         self.lifeBar.setMaximum(pacLifes)
 
@@ -445,10 +442,6 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         bar_thread.daemon = True
         bar_thread.start()    
 
-        gpio_thread = threading.Thread(target=self.gpio_soft)
-        gpio_thread.daemon = True
-        gpio_thread.start()    
-
         settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", orange="0", purple="0"))
         print(settings)
 
@@ -458,8 +451,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "init", 1), kwargs={}).start()
         # self.btnStart.setEnabled(True)
 
-        # GPIO.add_event_detect(11, GPIO.RISING, callback=self.startStop, bouncetime=500)
-        # GPIO.add_event_detect(29, GPIO.RISING, callback=self.rgb, bouncetime=500)
+        GPIO.add_event_detect(11, GPIO.RISING, callback=self.gpio_soft, bouncetime=500)
+        GPIO.add_event_detect(29, GPIO.RISING, callback=self.gpio_soft, bouncetime=500)
 
     def pressedHammerButton(self):
         global modelList, selectedPacman
@@ -510,6 +503,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         actual_game.finishTime = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
 
         self.lstViewCodes.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        self.btnStart.setEnabled(True)
 
         if auto == True:
             #Send Data

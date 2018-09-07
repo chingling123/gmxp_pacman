@@ -532,6 +532,32 @@ background: red;
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QPushButton" name="btnStart">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>380</y>
+      <width>261</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">:enabled{
+	
+	background-color: rgb(78, 154, 6);
+color: rgb(255, 255, 255);}</string>
+    </property>
+    <property name="text">
+     <string>Start</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
