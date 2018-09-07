@@ -216,29 +216,37 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
-    def pressedAddButton(self):
-        global modelList
-        print("scan")
-        barcode =  barcode_reader()
-        print(barcode)
-        print(modelList.findItems(barcode))
-        
-        if len(modelList.findItems(barcode)) > 0:
-            self.showAlert('Credencial em uso!!')
-            return
+    def barcode(self):
+        global modelList, actual_barcode
+        while True:
+            print actual_barcode
+            actual_barcode = barcode_reader()
+            if actual_barcode != "":
+                # self.pressedAddButton(barcode_reader())
 
-        nu = re.findall(r'\d+',barcode)
-        print(nu[0])
-        if verify(nu[0]) == False:
-            self.showAlert('Erro ao ler credencial!')
-        else:
-            item = QStandardItem(barcode)
-            modelList.appendRow(item)
-            if modelList.rowCount() >= 1:
-                self.btnRemove.setEnabled(True)
-                self.btnHammer.setEnabled(True)
-            if modelList.rowCount() == 5:
-                self.btnAdd.setEnabled(False)
+        # def pressedAddButton(self, barcode):
+                
+                print("scan")
+                print(modelList.findItems(actual_barcode))
+                
+                if len(modelList.findItems(actual_barcode)) <= 0:
+                    # self.showAlert('Credencial em uso!!')
+                    # return
+
+                    nu = re.findall(r'\d+',actual_barcode)
+                    print(nu[0])
+                    if verify(nu[0]) == False:
+                        self.showAlert('Erro ao ler credencial!')
+                    else:
+                        item = QStandardItem(actual_barcode)
+                        modelList.appendRow(item)
+                        if modelList.rowCount() >= 1:
+                            self.btnRemove.setEnabled(True)
+                            self.btnHammer.setEnabled(True)
+                        if modelList.rowCount() == 5:
+                            self.btnAdd.setEnabled(False)
+                            
+                actual_barcode = ""
 
     def pressedRemoveButton(self):
         global modelList
@@ -408,7 +416,11 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         reading_thread = threading.Thread(target=self.reading)
         reading_thread.daemon = True
-        reading_thread.start()    
+        reading_thread.start()   
+
+        bar_thread = threading.Thread(target=self.barcode)
+        bar_thread.daemon = True
+        bar_thread.start()    
 
         settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", orange="0", purple="0"))
         print(settings)
