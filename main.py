@@ -32,8 +32,8 @@ from zabbix_gmxp import SendDataZabbix
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(7, GPIO.OUT)
-GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(29, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+GPIO.setup(29, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
 radio = RF24(22, 0);
 
@@ -120,8 +120,32 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             i += 1
         return decimal
 
+    def gpio_soft(self):
+        while True:
+            if GPIO.input(11) == 1:
+                if isRGBBlue == True:
+                    isRGBBlue = False
+                    self.onLightOut("100")
+                    self.sendPacManVitamin()
+                else:
+                    isRGBBlue = True
+                    self.onLightOut("001")
+                    self.sendNoPacmVitamin()
+             if GPIO.input(29) == 1:
+                if isPlaying == False:
+                    isPlaying = True
+                    isRGBBlue = True
+                    self.sendNoPacmVitamin()
+                    self.pressedStartButton()
+                else:
+                    isPlaying = False
+                    self.stopTimer(True)
+                    print(GPIO.input(11))
+                    print(GPIO.input(29))
+
     def reading(self):
         global serialReturn, pacVitamin
+
         while 1: 
             raw_reading = self.port.readline()
             try:
@@ -421,6 +445,10 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         bar_thread.daemon = True
         bar_thread.start()    
 
+        gpio_thread = threading.Thread(target=self.gpio_soft)
+        gpio_thread.daemon = True
+        gpio_thread.start()    
+
         settings = Config().read_or_new_pickle('settings.dat', dict(pacman="0", blue="0", red="0", orange="0", purple="0"))
         print(settings)
 
@@ -430,37 +458,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "init", 1), kwargs={}).start()
         # self.btnStart.setEnabled(True)
 
-        GPIO.add_event_detect(11, GPIO.RISING, callback=self.startStop, bouncetime=500)
-        GPIO.add_event_detect(29, GPIO.RISING, callback=self.rgb, bouncetime=500)
-
-
-    def startStop(self, channel):
-        print(channel)
-        print('Start Stop')
-        print(GPIO.input(11))
-        
-        if isPlaying == False:
-            isPlaying = True
-            isRGBBlue = True
-            self.sendNoPacmVitamin()
-            self.pressedStartButton()
-        else:
-            isPlaying = False
-            self.stopTimer(True)
-        
-
-    def rgb(self, channel):
-        if isRGBBlue == True:
-            isRGBBlue = False
-            self.onLightOut("100")
-            self.sendPacManVitamin())
-        else:
-            isRGBBlue = True
-            self.onLightOut("001")
-            self.sendNoPacmVitamin()
-            print(channel)
-            print('RGB')
-            print(GPIO.input(29))
+        # GPIO.add_event_detect(11, GPIO.RISING, callback=self.startStop, bouncetime=500)
+        # GPIO.add_event_detect(29, GPIO.RISING, callback=self.rgb, bouncetime=500)
 
     def pressedHammerButton(self):
         global modelList, selectedPacman
