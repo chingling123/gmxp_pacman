@@ -32,6 +32,8 @@ from zabbix_gmxp import SendDataZabbix
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(7, GPIO.OUT)
+GPIO.setup(11, GPIO.IN)
+GPIO.setup(29, GPIO.IN)
 
 radio = RF24(22, 0);
 
@@ -222,29 +224,22 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
             print actual_barcode
             actual_barcode = barcode_reader()
             if actual_barcode != "":
-                # self.pressedAddButton(barcode_reader())
-
-        # def pressedAddButton(self, barcode):
-                
                 print("scan")
                 print(modelList.findItems(actual_barcode))
-                
                 if len(modelList.findItems(actual_barcode)) <= 0:
-                    # self.showAlert('Credencial em uso!!')
-                    # return
-
                     nu = re.findall(r'\d+',actual_barcode)
                     print(nu[0])
                     if verify(nu[0]) == False:
                         self.showAlert('Erro ao ler credencial!')
                     else:
                         item = QStandardItem(actual_barcode)
-                        modelList.appendRow(item)
+                        if modelList.rowCount() < 5:
+                            modelList.appendRow(item)
                         if modelList.rowCount() >= 1:
                             self.btnRemove.setEnabled(True)
-                            self.btnHammer.setEnabled(True)
-                        if modelList.rowCount() == 5:
-                            self.btnAdd.setEnabled(False)
+                            # self.btnHammer.setEnabled(True)
+                        
+                            # self.btnAdd.setEnabled(False)
                             
                 actual_barcode = ""
 
@@ -253,14 +248,14 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         for index in self.lstViewCodes.selectedIndexes():
             modelList.removeRow(index.row())
 
-        if modelList.rowCount() >= 1:
-            self.btnHammer.setEnabled(True)
-        if modelList.rowCount() <= 5:
-            self.btnAdd.setEnabled(True)
+        # if modelList.rowCount() >= 1:
+            # self.btnHammer.setEnabled(True)
+        # if modelList.rowCount() <= 5:
+            # self.btnAdd.setEnabled(True)
         if modelList.rowCount() == 0:
-            self.btnStart.setEnabled(False)
+            # self.btnStart.setEnabled(False)
             self.btnRemove.setEnabled(False)
-            self.btnHammer.setEnabled(False)
+            # self.btnHammer.setEnabled(False)
         
     def startLights(self):
         global isOkSerial, wait_time
@@ -289,7 +284,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
 
         global started_time, actual_player, actual_game, lightBlinkTimer, total_time, pacVitamin, buttonOne, buttonTwo, buttonThree, buttonFour, pacLifes
         
-        self.btnStart.setEnabled(False)
+        # self.btnStart.setEnabled(False)
         
         pacVitamin = 0
         buttonOne = 0
@@ -405,13 +400,13 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.timerTwo = QtCore.QTimer(self)
         self.timerTwo.timeout.connect(lambda: self.TimeVitamin())
 
-        self.btnAdd.clicked.connect(lambda: self.pressedAddButton())
+        # self.btnAdd.clicked.connect(lambda: self.pressedAddButton())
         self.btnRemove.clicked.connect(lambda: self.pressedRemoveButton())
-        self.btnStart.clicked.connect(lambda: self.pressedStartButton())
-        self.btnHammer.clicked.connect(lambda: self.pressedHammerButton())
+        # self.btnStart.clicked.connect(lambda: self.pressedStartButton())
+        # self.btnHammer.clicked.connect(lambda: self.pressedHammerButton())
         self.btnStop.clicked.connect(lambda: self.stopTimer(True))
-        self.btnRGBBlue.clicked.connect(lambda: self.sendNoPacmVitamin())
-        self.btnRGBRed.clicked.connect(lambda: self.sendPacManVitamin())
+        # self.btnRGBBlue.clicked.connect(lambda: self.sendNoPacmVitamin())
+        # self.btnRGBRed.clicked.connect(lambda: self.sendPacManVitamin())
 
         self.lstViewCodes.setModel(modelList)
         self.lifeBar.setMaximum(pacLifes)
@@ -433,15 +428,26 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "init", 1), kwargs={}).start()
         # self.btnStart.setEnabled(True)
 
+        GPIO.add_event_detect(11, GPIO.RISING)
+        GPIO.add_event_detect(29, GPIO.RISING)
+        GPIO.add_event_callback(11, self.startStop)
+        GPIO.add_event_callback(29, self.rgb)
+
+
+    def startStop(self):
+        print('Start Stop')
+
+    def rgb(self):
+        print('RGB')
     def pressedHammerButton(self):
         global modelList, selectedPacman
         index = random.randint(0,modelList.rowCount()-1)
         selectedPacman = modelList.takeItem(index)
         modelList.removeRow(index)
         modelList.insertRow(0, selectedPacman)
-        self.btnHammer.setEnabled(False)
+        # self.btnHammer.setEnabled(False)
         self.lstViewCodes.setSelectionMode(QAbstractItemView.NoSelection)
-        self.btnStart.setEnabled(True)
+        # self.btnStart.setEnabled(True)
         
 
     def stopTimer(self, auto):
@@ -449,8 +455,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.timerTwo.stop()
         self.timerOne.stop()
         self.onLightOut("000")
-        self.btnStart.setEnabled(False)
-        self.btnAdd.setEnabled(True)
+        # self.btnStart.setEnabled(False)
+        # self.btnAdd.setEnabled(True)
         self.btnRemove.setEnabled(False)
 
         for index in range(modelList.rowCount()):
