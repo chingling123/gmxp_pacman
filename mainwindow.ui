@@ -265,10 +265,13 @@ color: rgb(255, 255, 255);}</string>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdOne">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>490</x>
-      <y>250</y>
+      <x>500</x>
+      <y>310</y>
       <width>71</width>
       <height>51</height>
      </rect>
@@ -296,10 +299,13 @@ color: rgb(255, 255, 255);}</string>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdTwo">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>570</x>
-      <y>250</y>
+      <x>580</x>
+      <y>310</y>
       <width>71</width>
       <height>51</height>
      </rect>
@@ -333,10 +339,13 @@ color: rgb(255, 255, 255);}</string>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdPac">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>250</y>
+      <x>420</x>
+      <y>310</y>
       <width>71</width>
       <height>51</height>
      </rect>
@@ -364,10 +373,13 @@ color: rgb(255, 255, 255);}</string>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdFour">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>710</x>
-      <y>250</y>
+      <x>720</x>
+      <y>310</y>
       <width>71</width>
       <height>51</height>
      </rect>
@@ -395,10 +407,13 @@ color: rgb(255, 255, 255);}</string>
     </property>
    </widget>
    <widget class="QLCDNumber" name="lcdThree">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>250</y>
+      <x>650</x>
+      <y>310</y>
       <width>71</width>
       <height>51</height>
      </rect>
@@ -561,8 +576,8 @@ color: rgb(255, 255, 255);}</string>
     </property>
     <property name="geometry">
      <rect>
-      <x>403</x>
-      <y>310</y>
+      <x>320</x>
+      <y>340</y>
       <width>81</width>
       <height>23</height>
      </rect>
@@ -595,6 +610,54 @@ background: red;
     </property>
     <property name="invertedAppearance">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnRGBBlue">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>180</y>
+      <width>121</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>20</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">:enabled{color: rgb(255, 255, 255);
+background-color: rgb(114, 159, 207);}</string>
+    </property>
+    <property name="text">
+     <string>BLUE</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnRGBRed">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>180</y>
+      <width>111</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">:enabled{background-color: rgb(204, 0, 0);
+color: rgb(255, 255, 255);}</string>
+    </property>
+    <property name="text">
+     <string>RED</string>
     </property>
    </widget>
   </widget>

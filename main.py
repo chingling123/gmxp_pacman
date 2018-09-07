@@ -410,6 +410,8 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.btnStart.clicked.connect(lambda: self.pressedStartButton())
         self.btnHammer.clicked.connect(lambda: self.pressedHammerButton())
         self.btnStop.clicked.connect(lambda: self.stopTimer(True))
+        self.btnRGBBlue.clicked.connect(lambda: self.sendNoPacmVitamin())
+        self.btnRGBRed.clicked.connect(lambda: self.sendPacManVitamin())
 
         self.lstViewCodes.setModel(modelList)
         self.lifeBar.setMaximum(pacLifes)
