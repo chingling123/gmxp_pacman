@@ -32,8 +32,8 @@ from zabbix_gmxp import SendDataZabbix
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(7, GPIO.OUT)
-GPIO.setup(11, GPIO.IN)
-GPIO.setup(29, GPIO.IN)
+GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(29, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 radio = RF24(22, 0);
 
@@ -57,6 +57,8 @@ radio.startListening()
 
 stopSerial = True
 isOkSerial = False
+isPlaying = False
+isRGBBlue = False
 
 wait_time = 0.4
 started_time = 0
@@ -301,7 +303,7 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         self.lcdPac.display(pacVitamin)
         self.lifeBar.setValue(pacLifes)
 
-        self.startLights()
+        # self.startLights()
         self.onLightOut("001")
         self.startGame()
         
@@ -428,17 +430,38 @@ class MainWindow(QMainWindow, mainwindow_auto.Ui_MainWindow):
         threading.Thread(target=SendDataZabbix().send_zabbix, args=("gxp-pm01", "init", 1), kwargs={}).start()
         # self.btnStart.setEnabled(True)
 
-        GPIO.add_event_detect(11, GPIO.RISING)
-        GPIO.add_event_detect(29, GPIO.RISING)
-        GPIO.add_event_callback(11, self.startStop)
-        GPIO.add_event_callback(29, self.rgb)
+        GPIO.add_event_detect(11, GPIO.RISING, callback=self.startStop, bouncetime=500)
+        GPIO.add_event_detect(29, GPIO.RISING, callback=self.rgb, bouncetime=500)
 
 
-    def startStop(self):
+    def startStop(self, channel):
+        print(channel)
         print('Start Stop')
+        print(GPIO.input(11))
+        
+        if isPlaying == False:
+            isPlaying = True
+            isRGBBlue = True
+            self.sendNoPacmVitamin()
+            self.pressedStartButton()
+        else:
+            isPlaying = False
+            self.stopTimer(True)
+        
 
-    def rgb(self):
-        print('RGB')
+    def rgb(self, channel):
+        if isRGBBlue == True:
+            isRGBBlue = False
+            self.onLightOut("100")
+            self.sendPacManVitamin())
+        else:
+            isRGBBlue = True
+            self.onLightOut("001")
+            self.sendNoPacmVitamin()
+            print(channel)
+            print('RGB')
+            print(GPIO.input(29))
+
     def pressedHammerButton(self):
         global modelList, selectedPacman
         index = random.randint(0,modelList.rowCount()-1)

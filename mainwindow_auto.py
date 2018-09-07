@@ -117,7 +117,7 @@ class Ui_MainWindow(object):
         self.lcdPac.setObjectName("lcdPac")
         self.lcdFour = QtWidgets.QLCDNumber(self.centralWidget)
         self.lcdFour.setEnabled(False)
-        self.lcdFour.setGeometry(QtCore.QRect(720, 310, 71, 51))
+        self.lcdFour.setGeometry(QtCore.QRect(720, 210, 71, 51))
         self.lcdFour.setStyleSheet("color: rgb(117, 80, 123);")
         self.lcdFour.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.lcdFour.setFrameShadow(QtWidgets.QFrame.Raised)
